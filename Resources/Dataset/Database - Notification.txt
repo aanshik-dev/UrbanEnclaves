@@ -1,0 +1,46 @@
+CODE,RID,SID,Message,Type,Date,Time,Status
+100001,1000000001,1000000002,Your property viewing is scheduled.,Meeting,2025-01-05,10:30,Read
+100002,1000000002,1000000001,I would like to schedule a viewing.,Inquiry,2025-01-06,11:15,Unread
+100003,1000000004,1000000014,Please provide additional documents.,Transaction,2025-01-07,9:45,Read
+100004,1000000016,1000000005,Can you provide more details on the property?,Property,2025-01-08,14:20,Read
+100005,1000000007,1000000018,The seller has accepted your offer.,Transaction,2025-01-09,16:00,Unread
+100006,1000000019,1000000008,I have uploaded the requested documents.,Transaction,2025-01-10,10:05,Read
+100007,1000000009,1000000021,Your transaction has been approved.,Transaction,2025-01-11,12:30,Read
+100008,1000000023,1000000010,What is the status of my transaction?,Inquiry,2025-01-12,15:45,Unread
+100009,1000000011,1000000025,We have a new property matching your criteria.,Property,2025-01-13,9:10,Read
+100010,1000000028,1000000012,I am interested in making an offer.,Transaction,2025-01-14,11:50,Unread
+100011,1000000013,1000000029,Please confirm your availability for tomorrow.,Meeting,2025-01-15,13:25,Read
+100012,1000000030,1000000015,Please cancel my appointment for tomorrow.,Meeting,2025-01-16,16:40,Read
+100013,1000000017,1000000031,The property price has been reduced.,Property,2025-01-17,10:15,Unread
+100014,1000000032,1000000020,Are there any other properties available in this area?,Inquiry,2025-01-18,14:55,Read
+100015,1000000022,1000000033,Your lease agreement is ready for signature.,Transaction,2025-01-19,9:30,Read
+100016,1000000035,1000000024,I have signed the lease agreement.,Transaction,2025-01-20,11:05,Unread
+100017,1000000026,1000000037,A new document has been uploaded to your portal.,General,2025-01-21,15:20,Read
+100018,1000000042,1000000027,Can we negotiate the price?,Inquiry,2025-01-22,10:45,Read
+100019,1000000034,1000000044,Your property viewing is scheduled.,Meeting,2025-01-23,13:10,Unread
+100020,1000000045,1000000036,I would like to schedule a viewing.,Inquiry,2025-01-24,16:35,Read
+100021,1000000038,1000000046,Please provide additional documents.,Transaction,2025-01-25,9:50,Read
+100022,1000000048,1000000039,Can you provide more details on the property?,Property,2025-01-26,12:15,Unread
+100023,1000000040,1000000049,The seller has accepted your offer.,Transaction,2025-01-27,14:40,Read
+100024,1000000050,1000000041,I have uploaded the requested documents.,Transaction,2025-01-28,10:25,Read
+100025,1000000043,1000000002,Your transaction has been approved.,Transaction,2025-01-29,15:50,Unread
+100026,1000000006,1000000047,What is the status of my transaction?,Inquiry,2025-01-30,9:15,Read
+100027,1000000001,1000000014,We have a new property matching your criteria.,Property,2025-01-31,11:40,Read
+100028,1000000016,1000000003,I am interested in making an offer.,Transaction,2025-02-01,14:05,Unread
+100029,1000000004,1000000018,Please confirm your availability for tomorrow.,Meeting,2025-02-02,16:30,Read
+100030,1000000019,1000000005,Please cancel my appointment for tomorrow.,Meeting,2025-02-03,10:55,Read
+100031,1000000007,1000000021,The property price has been reduced.,Property,2025-02-04,13:20,Unread
+100032,1000000023,1000000008,Are there any other properties available in this area?,Inquiry,2025-02-05,9:45,Read
+100033,1000000009,1000000025,Your lease agreement is ready for signature.,Transaction,2025-02-06,12:10,Read
+100034,1000000028,1000000010,I have signed the lease agreement.,Transaction,2025-02-07,15:35,Unread
+100035,1000000011,1000000029,A new document has been uploaded to your portal.,General,2025-02-08,10:00,Read
+100036,1000000030,1000000012,Can we negotiate the price?,Inquiry,2025-02-09,14:25,Read
+100037,1000000013,1000000031,Your property viewing is scheduled.,Meeting,2025-02-10,16:50,Unread
+100038,1000000032,1000000015,I would like to schedule a viewing.,Inquiry,2025-02-11,11:15,Read
+100039,1000000017,1000000033,Please provide additional documents.,Transaction,2025-02-12,9:40,Read
+100040,1000000035,1000000020,Can you provide more details on the property?,Property,2025-02-13,13:05,Unread
+100041,1000000022,1000000037,The seller has accepted your offer.,Transaction,2025-02-14,15:30,Read
+100042,1000000042,1000000024,I have uploaded the requested documents.,Transaction,2025-02-15,10:55,Read
+100043,1000000026,1000000044,Your transaction has been approved.,Transaction,2025-02-16,12:20,Unread
+100044,1000000045,1000000027,What is the status of my transaction?,Inquiry,2025-02-17,16:45,Read
+100045,1000000034,1000000046,We have a new property matching your criteria.,Property,2025-02-18,9:10,Read

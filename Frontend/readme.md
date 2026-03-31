@@ -1,58 +1,16 @@
-`Delete this file when you start working,`
+# React + Vite
 
-The Entire backend is to be implemented in this folder
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Follow the steps to collaborate on gitHub.
+Currently, two official plugins are available:
 
-<br>
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## 🐦‍🔥 1. The Branching Strategy (Crucial)
+## React Compiler
 
-Never push code directly to the main branch. This keeps the "production" code stable. Instead, use a Feature Branch workflow:
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-- Main Branch: The stable, working version of the project.
-- Feature Branches: Each member creates a new branch for a specific task (e.g., frontend-login-ui, backend-api-auth, db-schema-setup).
+## Expanding the ESLint configuration
 
-<br>
-
-## 🐦‍🔥 2. The Collaborative Workflow
-
-Each time someone starts working, they should follow these steps:
-
-⚡`Pull the latest changes:` Ensure your local machine has the most recent code from the team.
-
-```bash
-git checkout main
-git pull origin main
-```
-
-⚡ `Create a new branch:`
-
-```bash
-git checkout -b feature/your-task-name
-```
-
-⚡ `Code and Commit:` Work inside your specific folder (frontend, backend, etc.).
-
-```bash
-git add .
-git commit -m "Add: functional login form"
-```
-
-⚡ `Push to GitHub:`
-
-```bash
-git push origin feature/your-task-name
-```
-
-<br>
-
-## 🐦‍🔥 3. Pull Requests (PRs) & Code Review
-
-Once you push your branch, go to GitHub and open a Pull Request.
-
-- This asks the team to "merge" your code into the main branch.
-
-- The other team members should look at your code, leave comments, and eventually "Approve" it.
-
-- The DB person should especially review backend PRs that affect how data is fetched.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

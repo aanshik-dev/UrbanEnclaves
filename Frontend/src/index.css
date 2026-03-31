@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=AR+One+Sans:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Exa:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Labrada:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Blinker:wght@100;200;300;400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Teko:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Science+Gothic:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Days+One&display=swap');
+
+
+/* Fonts */
+/* 
+"ar-one-sans"
+,"inter"
+,"lexend-exa"
+,"labrada"
+,"nunito-sans"
+,"maven-pro"
+,"anybody"
+,"baloo-2"
+,"blinker"
+,"league-spartan"
+,"josefin-sans"
+,"red-hat-display"
+,"teko"
+,"righteous"
+,"russo-one"
+,"mitr"
+,"science-gothic"
+,"quantico"
+,"monoton"
+,"days-one"
+*/
+
+@import "tailwindcss";
+
+
+html, body {
+  scrollbar-width: thin;
+  scrollbar-color: #57009d #1b0037;
+}
+
+/* For Chrome, Edge, and Safari */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #05000a;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #57009d;
+  border-radius: 20px;
+  border: 2px solid #05000a;
+}
+
+
+.ar-one-sans {
+  font-family: 'AR One Sans', sans-serif;
+}
+
+.inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.lexend-exa {
+  font-family: 'Lexend Exa', sans-serif;
+}
+
+.labrada {
+  font-family: 'Labrada', serif;
+}
+
+.nunito-sans {
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.maven-pro {
+  font-family: 'Maven Pro', sans-serif;
+}
+
+.anybody {
+  font-family: 'Anybody', sans-serif;
+}
+
+.baloo-2 {
+  font-family: 'Baloo 2', sans-serif;
+}
+
+.blinker {
+  font-family: 'Blinker', sans-serif;
+}
+
+.league-spartan {
+  font-family: 'League Spartan', sans-serif;
+}
+
+.josefin-sans {
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.red-hat-display {
+  font-family: 'Red Hat Display', sans-serif;
+}
+
+.teko {
+  font-family: 'Teko', sans-serif;
+}
+
+.righteous {
+  font-family: 'Righteous', sans-serif;
+}
+
+.russo-one {
+  font-family: 'Russo One', sans-serif;
+}
+
+.mitr {
+  font-family: 'Mitr', sans-serif;
+}
+
+.science-gothic {
+  font-family: 'Science Gothic', sans-serif;
+}
+
+.quantico {
+  font-family: 'Quantico', sans-serif;
+}
+
+.monoton {
+  font-family: 'Monoton', sans-serif;
+}
+
+.days-one {
+  font-family: 'Days One', sans-serif;
+}
+
+
+@keyframes flicker {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
