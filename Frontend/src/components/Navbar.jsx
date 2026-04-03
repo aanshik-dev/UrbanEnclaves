@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import { Building2 } from "lucide-react";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -8,9 +9,9 @@ const Navbar = () => {
   const location = useLocation();
 
   const navLinks = [
-    { path: "/features", label: "Features" },
-    { path: "/how-it-works", label: "How It Works" },
-    { path: "/about", label: "About" },
+    { path: "/home/features", label: "Features" },
+    { path: "/home/how-it-works", label: "How It Works" },
+    { path: "/home/about", label: "About" },
   ];
 
   useEffect(() => {
@@ -36,13 +37,15 @@ const Navbar = () => {
           className="flex items-center gap-4 cursor-pointer text-amber-50"
           onClick={() => navigate("/")}
         >
-          <div className="w-10 h-10 bg-[#852800] rounded-xl flex items-center justify-center shadow-[#361000] shadow-sm text-2xl">
+          <div className="w-10 h-10 bg-orange-800 rounded-xl flex items-center justify-center shadow-[#361000] shadow-sm text-2xl">
             <Icon icon="icon-park-solid:building-two" />
           </div>
           <p className="text-xl md:text-2xl days-one whitespace-nowrap">
-            Urban Enclaves
+            Urban<span className="text-orange-500">Enclaves</span>
           </p>
         </div>
+
+        
 
         {/* Nav Links */}
         <div className="flex items-center gap-6">
