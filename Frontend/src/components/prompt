@@ -1,0 +1,73 @@
+I want to create the frontend for this dbms project, can you help me create the project, there has to be three sections, Admin Panel, Agent Panel, and User panel,
+
+What is done -
+First we have Landing page with some other info pages, which will have a register now, and login button, which redirect to the register/Login form, the Register page has fields required in user table of the schema file provided, and a checkbox saying that i am an Agent, the login page has 3 options, register as agent, user, and Admin - these pages are already made
+
+What is to be done -
+
+1. Common things in Interface:
+   After any of the three Agent/User/Admin Logins, he lands on the User/Agent/Admin Page with routes like /user/home, /agent/home, /admin/home, The contents of the home page will be different for each based on the roles.
+   On the left side there will be a Collapsible sidebar, containing the profile details, dashboard, about, settings etc, here the tabs will vary based on who logs in.
+   On the the top there will be a strip having the search bar, and a notification icon, change theme icon.
+
+2. Admin Page
+
+   -- Side Panel Tabs --
+
+- Dashboard : Contains the overview of the data, best performing agent, total listings, Total Revenue, agents under the admin, sales overview
+- Track Properties : Contains the details of the property, and the agent assigned to it, admin can track properties, there has to be a robust filter system through which the admin can query the database perfectly, filter out properties base on status, sold or rent, city area, sort them based on different possible parameters.
+- Raw Queries : A dedicated section where the admin can write the raw sql queries and get the results, and can also download the results in csv format, the result fetched can be of different size and attributes so the table representing should be dynamic, i maen it changes for different numbers of attributes and size of table. The filter and query system should be robust enough to handle any query like given below -
+  (a) List the houses in your city (for example Guwahati) that are built later than 2023 and are available for rent.
+  (b) Find the addresses of the houses in your city costing between Rs.20,00,000 and Rs. 60,00,000.
+  (c) Find the addresses of the houses for rent in G.S.Road (you can use the name of another locality if your city is different) with at least 2 bedrooms and costing less than Rs.15,000 per month.
+  (d) Find the name of the agent who has sold the most property in the year 2023 by total amount in rupees.
+  (e) For each agent, compute the average selling price of properties sold in 2018, and the average time the property was on the market. Note that this suggests use of date attributes in your design.
+  (f) List the details of the most expensive houses and the houses with the highest rent, in the database.
+
+- Agent Performance : this page contains the overview of the agents, there are multiple admin offices, there should be options to show all univarsal agents, agents under current admin office, he should be able to filter out agents same as the track properties page, also he should be able to sort them based on different parameters possible from the schema, when the agent clicks on any agent then his entire details should come there like the ratings, commission, property sold, current holdings, etc. There should also be a feature to search the agent based on the AID, and name
+- Transactions Record : I contains the details of all the transactions, there should be an option to filter them based on the agent, property, status, date, etc and all posssible parameters similar to other tabs.
+- Notifications : this page will contain the notifications, and whenever some user registers as I am an agent, then his profile has to be approved by the agent, so view profile and verify agent facility should be there. there should be a notification badge for unread notifications
+
+- Profile : this contains the details of the admin, and he should be able to update them accordingly.
+- About : this tab contains the details about the website, its creator, developers etc, this website is developed by the team of 4, there should be the profile cards of each with social links.
+- Settings : this section contains settings like change password, change theme, and logout, (No Delete Account Button, Admin office is not supposed to delete the account)
+- Logout button (at bottom)
+  The admin should be able to access all the data, and query it.
+
+3. Agent Page
+
+   -- Side Panel Tabs --
+
+- Dashboard : Contains the details showing the number of properties deal by him, current listing holdings, total commission earned, best selling property, Agent Score, Rating etc
+
+- Listings : This page contains the details about the properties listed by their owners, who do not have any agent associated with them, they should be able to filter them based on the status, city, and sort them based on different parameters possible. and send request to become an agent, when he send request, the owner of the property should get the notification, and he should be able to accept or reject the request, after viewing the agent details.
+  Listing page structure - There should be the list of the houses/appartments on the left which can be filtered based on the different parameters, on the right side there should be the detailed preview of property with complete description and details of the selected properties, with a carousel of images, expected price and all other attributes shown in the Property and ListingToken tables in schema, the images are fetched from the database, there should be owner details and a button to become the agent of the property.
+
+- Holdings : this page is similar to the listings but the properies here are only those properties, which are the agent is related, the sold by him, current, etc he should be able to manage the property, there should be a leave property button only if the property is for sell/rent, not for the sold properties or maybe disable(fade) it if the property is already sold, so that agent can leave that property.
+
+- Nitifications : this page contain the notifications, and whenever some interested user(buyer) click the make a deal option, those notifications should be there, saying Username- wants to negotiate or pay a visit, along with his contact details. there should be a notification badge for unread notifications
+
+- Profile : this contains the details of the agent, and he should be able to update them accordingly.
+- About : this tab contains the details about the website, its creator, developers etc, this website is developed by the team of 4, there should be the profile cards of each with social links.
+- Settings : this section contains settings like change password, change theme, and logout, (No Delete Account Button, Admin office is not supposed to delete the account)
+- Logout button (at bottom)
+
+4. User Page
+
+   -- Side Panel Tabs --
+
+- Listings : this page is similar to the listings page of the agent but there is a difference that these are the properties to which the agent is assigned and are currently for rent or sell. the description should have the agent details, the user should be able to filter them based on the status, city, and sort them based on different parameters possible. There should be a Make a deal button, along with a toggle saying 'visit property', whenever he clicks a notification will be sent to the agent and the owner of the property.
+
+- My properties: these are the properties which are owned by user and added by him to his portfolio. there will be some properties. Ther should be a button saying "Add Property", which opens a form asking the details about the property, all the attributes mentioned in the property table, and there should be a button to remove, Edit and List the property. the user should be able to see list of All, Purchased, owned, LISTED etc properties.
+
+- Notification - this page contain the notifications, and whenever some interested user(buyer) click the make a deal option, those notifications should be there, saying Username- wants to negotiate or pay a visit, along with his contact details. there can be also messages from the agent. there should be a notification badge for unread notifications
+
+- Profile : this contains the details of the user, and he should be able to update them accordingly.
+- About : this tab contains the details about the website, its creator, developers etc, this website is developed by the team of 4, there should be the profile cards of each with social links.
+- Settings : this section contains settings like change password, change theme, and logout, (No Delete Account Button, Admin office is not supposed to delete the account)
+- Logout button (at bottom)
+
+Complete the frontend project in react ,Tailwind, and Js and use the same theme as used in the current files provided.
+The name of website is Urban Enclaves.
+
+Backend: We are doing the backend using the spring boot and java. I will need to connect to the backend so create in such a way that i can call apis from the frontend.

@@ -45,8 +45,6 @@ const Navbar = () => {
           </p>
         </div>
 
-        
-
         {/* Nav Links */}
         <div className="flex items-center gap-6">
           {navLinks.map((link) => {

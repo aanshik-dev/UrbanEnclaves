@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Mail,
@@ -27,7 +27,8 @@ const Login = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     const routes = {
-      ADMIN: "/admin/dashboard",
+      OFFICE: "/agent/home",
+      ADMIN: "/admin/home",
       AGENT: "/agent/home",
       USER: "/user/home",
     };
@@ -35,9 +36,10 @@ const Login = () => {
   };
 
   const roles = [
-    { id: "USER", icon: User, label: "User" },
-    { id: "AGENT", icon: Briefcase, label: "Agent" },
-    { id: "ADMIN", icon: ShieldCheck, label: "Admin" },
+    { id: "USER", icon: "mi:user", label: "User" },
+    { id: "AGENT", icon: "mdi:face-agent", label: "Agent" },
+    { id: "OFFICE", icon: "tabler:briefcase", label: "Office" },
+    { id: "ADMIN", icon: "iconamoon:shield-yes", label: "Admin" },
   ];
 
   const stats = [
@@ -58,16 +60,6 @@ const Login = () => {
           </div>
           <span className="text-sm font-medium tracking-wide">Back</span>
         </button>
-
-        {/* Logo - Hidden on large screens because it's in the sidebar, visible on mobile */}
-        <div className="lg:hidden flex items-center gap-2">
-          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-            <Building2 className="text-zinc-950" size={16} />
-          </div>
-          <span className="text-lg font-bold tracking-tighter">
-            UrbanEnclaves
-          </span>
-        </div>
       </div>
 
       {/* --- LEFT SIDE: VISUAL SIDEBAR --- */}
@@ -137,10 +129,10 @@ const Login = () => {
         >
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8 justify-center">
-            <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
+            <div className="p-2 bg-orange-800 rounded-xl flex items-center text-lg justify-center">
               <Icon icon="icon-park-solid:building-two" />
             </div>
-            <span className="text-xl font-bold tracking-tight">
+            <span className="text-[25px] font-bold tracking-tight">
               Urban<span className="text-orange-500">Enclaves</span>
             </span>
           </div>
@@ -158,6 +150,7 @@ const Login = () => {
             {roles.map((opt) => (
               <button
                 key={opt.id}
+                type="button"
                 onClick={() => setRole(opt.id)}
                 className={`relative flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all ${
                   role === opt.id
@@ -173,7 +166,7 @@ const Login = () => {
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-2">
-                  <opt.icon size={16} />
+                  <Icon className="text-lg" icon={opt.icon} />
                   {opt.label}
                 </span>
               </button>
@@ -182,7 +175,6 @@ const Login = () => {
 
           {/* FORM */}
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Email */}
             <div>
               <label className="text-xs text-zinc-500 font-semibold ml-1">
                 Email
@@ -203,7 +195,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <div className="flex justify-between items-center">
                 <label className="text-xs text-zinc-500 font-semibold ml-1">
@@ -240,7 +231,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               className="w-full py-3 mt-2 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-xl flex items-center justify-center gap-2 transition-all group"
@@ -253,7 +243,6 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Bottom */}
           <div className="mt-6 text-center text-sm text-zinc-400">
             New here?{" "}
             <Link
@@ -264,7 +253,6 @@ const Login = () => {
             </Link>
           </div>
 
-          {/* Footer */}
           <div className="flex justify-center mt-8 text-xs text-zinc-600 gap-2 items-center">
             <ShieldCheck size={14} />
             Secure • Encrypted Platform
