@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import API from "../../api/axios";
 import {
   Database,
   Play,
@@ -13,15 +14,15 @@ import {
 const sampleQueries = [
   {
     id: 1,
-    title: "Guwahati Rent 2023+",
+    title: "Guwahati Rentals built after 2023",
     query:
-      "SELECT * FROM Property WHERE City = 'Guwahati' AND YearBuilt > 2023 AND ListType = 'Rent';",
+      "SELECT p.ID, p.House_No, p.city, p.Area, lt.list_type, p.year_built FROM Property p JOIN Listing_Token lt ON p.ID = lt.PID where p.city = 'Delhi' and p.year_built > 2016 and lt.List_Type = 'SELL';",
   },
   {
     id: 2,
     title: "Price Range 20L-60L",
     query:
-      "SELECT Address FROM Property WHERE Price BETWEEN 2000000 AND 6000000;",
+      "SELECT p.HouseNo, p.Locality, p.Area, p.City, lt.status FROM Property p JOIN Listing_Token lt ON p.PID = lt.PID WHERE lt.Price BETWEEN 2000000 AND 6000000;",
   },
   {
     id: 3,
@@ -35,60 +36,114 @@ const sampleQueries = [
     query:
       "SELECT Name FROM Agent JOIN Transaction ON Agent.AID = Transaction.AID WHERE YEAR(Date) = 2023 GROUP BY AID ORDER BY SUM(Amount) DESC LIMIT 1;",
   },
+  {
+    id: 5,
+    title: "Top Agent 2023",
+    query:
+      "SELECT Name FROM Agent JOIN Transaction ON Agent.AID = Transaction.AID WHERE YEAR(Date) = 2023 GROUP BY AID ORDER BY SUM(Amount) DESC LIMIT 1;",
+  },
+  {
+    id: 6,
+    title: "Top Agent 2023",
+    query:
+      "SELECT Name FROM Agent JOIN Transaction ON Agent.AID = Transaction.AID WHERE YEAR(Date) = 2023 GROUP BY AID ORDER BY SUM(Amount) DESC LIMIT 1;",
+  },
 ];
 
-const sampleResults = [
-  {
-    id: 101,
-    address: "Skyline Apt #402",
-    price: 8500000,
-    type: "Sale",
-    area: "G.S. Road",
-    bhk: 3,
-  },
-  {
-    id: 102,
-    address: "Green Valley Villa",
-    price: 45000,
-    type: "Rent",
-    area: "Zoo Road",
-    bhk: 4,
-  },
-  {
-    id: 103,
-    address: "Modern Studio Loft",
-    price: 3500000,
-    type: "Sale",
-    area: "Dispur",
-    bhk: 1,
-  },
-];
 
 export default function RawQueries() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [columns, setColumns] = useState([]); // Store dynamic column names
   const [isExecuting, setIsExecuting] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleExecute = () => {
-    setIsExecuting(true);
-    setError(null);
-    // Simulate API call
-    setTimeout(() => {
-      if (query.trim().toLowerCase().includes("select")) {
-        setResults(sampleResults);
-      } else {
-        setError("Invalid SQL query. Please check your syntax.");
-        setResults([]);
+
+
+  const handleExecute = async () => {
+  if (!query.trim()) return;
+
+  setIsExecuting(true);
+  setError(null);
+  setResults([]);
+  setColumns([]);
+
+  try {
+    // 1. Change to API.post since backend is now @PostMapping
+    // 2. Pass the payload directly as the second argument
+    const response = await API.post("/admin/query", { 
+      query: query 
+    });
+
+    // Based on your previous successful API calls, 
+    // your backend structure is: { data: { success: true, columns: [...], data: [...] } }
+    const serverPayload = response.data.data; 
+
+    if (serverPayload) {
+      // Set columns and rows dynamically from the server response
+      setColumns(serverPayload.columns || []);
+      setResults(serverPayload.data || []);
+      
+      // If the backend doesn't send a 'success' boolean but sends data, 
+      // we assume success. Otherwise, check for serverPayload.success
+      if (serverPayload.success === false) {
+        setError(serverPayload.message || "Query failed to execute.");
       }
-      setIsExecuting(false);
-    }, 1000);
-  };
+    }
+  } catch (err) {
+    console.error("SQL Execution Error:", err);
+    
+    // Using your global error logger structure
+    const errorMessage =
+      err.response?.data?.error?.message || "Failed to execute query.";
+    setError(errorMessage);
+  } finally {
+    setIsExecuting(false);
+  }
+};
+
+
+
+  // const handleExecute = async () => {
+  //   if (!query.trim()) return;
+
+  //   setIsExecuting(true);
+  //   setError(null);
+  //   setResults([]);
+  //   setColumns([]);
+
+  //   try {
+  //     // Backend structured as { data: { columns: [], data: [] } }
+  //     // Using API.get with 'params' or 'data' depending on your backend config
+  //     const response = await API.get("/admin/query", {
+  //       data: { query: query },
+  //     });
+
+  //     const serverPayload = response.data.data; // This is the inner "data" object
+
+  //     if (serverPayload.success) {
+  //       setColumns(serverPayload.columns || []);
+  //       setResults(serverPayload.data || []);
+  //     } else {
+  //       setError(serverPayload.message || "Query failed to execute.");
+  //     }
+  //   } catch (err) {
+  //     console.error("SQL Execution Error:", err);
+  //     const errorMessage =
+  //       err.response?.data?.error?.message || "Failed to execute query.";
+  //     setError(errorMessage);
+  //   } finally {
+  //     setIsExecuting(false);
+  //   }
+  // };
 
   const handleDownloadCSV = () => {
     if (results.length === 0) return;
-    const headers = Object.keys(results[0]).join(",");
-    const rows = results.map((row) => Object.values(row).join(",")).join("\n");
+    const headers = columns.join(",");
+    const rows = results
+      .map((row) => columns.map((col) => `"${row[col] ?? ""}"`).join(","))
+      .join("\n");
+
     const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows;
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -111,8 +166,8 @@ export default function RawQueries() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Query Editor */}
         <div className="lg:col-span-2 space-y-6">
+        {/* Query Editor */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-hidden backdrop-blur-sm">
             <div className="flex items-center justify-between px-8 py-4 border-b border-zinc-800/50 bg-zinc-900/80">
               <div className="flex items-center gap-2 text-orange-500">
@@ -167,56 +222,46 @@ export default function RawQueries() {
           </AnimatePresence>
 
           {/* Results Table */}
+                    {/* Results Table */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-hidden backdrop-blur-sm">
             <div className="flex items-center justify-between px-8 py-6 border-b border-zinc-800/50">
               <div className="flex items-center gap-2 text-white">
                 <TableIcon size={18} className="text-orange-500" />
                 <h3 className="text-lg font-bold">Query Results</h3>
-                <span className="ml-2 px-2 py-0.5 bg-zinc-800 rounded text-xs font-bold text-zinc-500">
-                  {results.length} Rows
-                </span>
+                <span className="ml-2 px-2 py-0.5 bg-zinc-800 rounded text-xs font-bold text-zinc-500">{results.length} Rows</span>
               </div>
-              <button
-                onClick={handleDownloadCSV}
-                disabled={results.length === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition-all"
-              >
-                <FileSpreadsheet size={16} />
-                Export CSV
+              <button onClick={handleDownloadCSV} disabled={results.length === 0} className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white text-sm font-bold rounded-xl">
+                <FileSpreadsheet size={16} /> Export CSV
               </button>
             </div>
-            <div className="overflow-x-auto">
+
+            <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-zinc-900/80">
-                    {results.length > 0 ? (
-                      Object.keys(results[0]).map((key) => (
-                        <th
-                          key={key}
-                          className="px-8 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50"
-                        >
-                          {key}
+                    {columns.length > 0 ? (
+                      columns.map((col) => (
+                        <th key={col} className="px-8 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50 whitespace-nowrap">
+                          {col}
                         </th>
                       ))
                     ) : (
-                      <th className="px-8 py-12 text-center text-zinc-600 font-medium italic">
-                        Execute a query to see results here
-                      </th>
+                      <th className="px-8 py-12 text-center text-zinc-600 font-medium italic">Execute a query to see results here</th>
                     )}
                   </tr>
                 </thead>
                 <tbody>
                   {results.map((row, i) => (
-                    <tr
-                      key={i}
-                      className="hover:bg-zinc-800/30 transition-colors"
-                    >
-                      {Object.values(row).map((val, j) => (
-                        <td
-                          key={j}
-                          className="px-8 py-4 text-sm text-zinc-300 font-medium border-b border-zinc-800/50"
-                        >
-                          {val}
+                    <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
+                      {columns.map((col, j) => (
+                        <td key={j} className="px-8 py-4 text-sm text-zinc-300 font-medium border-b border-zinc-800/50 whitespace-nowrap">
+                          {row[col] === null ? (
+                            <span className="text-zinc-600 italic">null</span>
+                          ) : typeof row[col] === "object" ? (
+                            JSON.stringify(row[col])
+                          ) : (
+                            row[col].toString()
+                          )}
                         </td>
                       ))}
                     </tr>

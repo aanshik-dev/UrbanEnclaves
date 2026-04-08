@@ -16,23 +16,53 @@ import {
   Globe,
 } from "lucide-react";
 import { Icon } from "@iconify/react";
+import API from "../api/axios";
 
 const Login = () => {
   const [role, setRole] = useState("USER");
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@urban.enc");
+  const [password, setPassword] = useState("password123");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const routes = {
-      OFFICE: "/agent/home",
-      ADMIN: "/admin/home",
-      AGENT: "/agent/home",
-      USER: "/user/home",
-    };
-    navigate(routes[role] || "/user/home");
+
+    try {
+      const response = await API.post("/auth/login", {
+        username: email,
+        password: password,
+        userType: role,
+      });
+
+      // Extracting data from your specific Spring Boot response structure
+      const { jwt, refresh, username, id } = response.data.data;
+
+      // Store session info
+      localStorage.setItem("token", jwt);
+      localStorage.setItem("refreshToken", refresh);
+      localStorage.setItem("role", role);
+      localStorage.setItem("username", username);
+      localStorage.setItem("id", id);
+
+      // Redirect to the correct dashboard
+      if (role === "ADMIN") navigate("/admin/home");
+      else if (role === "AGENT") navigate("/agent/home");
+      else if (role === "OFFICE") navigate("/office/home");
+      else navigate("/user/home");
+    } catch (error) {
+      // 1. This prints the whole Axios error object (you have to click the arrow to expand it)
+      console.log("Full Error Object:", error);
+
+      // 2. This is exactly what you see in Thunder Client
+      if (error.response) {
+        console.log("Server Response Data:", error.response.data);
+        // This will print "Bad credentials"
+        console.log("Specific Message:", error.response.data.error?.message);
+      }
+      const serverErrorMessage = error.response?.data?.error?.message;
+      alert(serverErrorMessage || "Invalid Credentials for this Role");
+    }
   };
 
   const roles = [

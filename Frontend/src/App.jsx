@@ -25,6 +25,8 @@ import AgentListings from "./components/dashboard/AgentListings";
 import Holdings from "./components/dashboard/Holdings";
 import About from "./components/dashboard/About";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+
 function App() {
   return (
     <BrowserRouter>
@@ -42,46 +44,55 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         {/* Admin Dashboard Routes */}
-        <Route path="/admin" element={<DashboardLayout role="ADMIN" />}>
-          <Route index element={<Navigate to="/admin/home" replace />} />
-          <Route path="home" element={<AdminHome />} />
-          <Route path="track" element={<TrackProperties />} />
-          <Route path="queries" element={<RawQueries />} />
-          <Route path="agents" element={<AgentPerformance />} />
-          <Route path="transactions" element={<TransactionsRecord />} />
-          <Route
-            path="notifications"
-            element={<Notifications role="ADMIN" />}
-          />
-          <Route path="profile" element={<Profile role="ADMIN" />} />
-          <Route path="about" element={<About />} />
-          <Route path="settings" element={<Settings />} />
+        <Route element={<ProtectedRoute allowedRole="ADMIN" />}>
+          <Route path="/admin" element={<DashboardLayout role="ADMIN" />}>
+            <Route index element={<Navigate to="/admin/home" replace />} />
+            <Route path="home" element={<AdminHome />} />
+            <Route path="track" element={<TrackProperties />} />
+            <Route path="queries" element={<RawQueries />} />
+            <Route path="agents" element={<AgentPerformance />} />
+            <Route path="transactions" element={<TransactionsRecord />} />
+            <Route
+              path="notifications"
+              element={<Notifications role="ADMIN" />}
+            />
+            <Route path="profile" element={<Profile role="ADMIN" />} />
+            <Route path="about" element={<About />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
         </Route>
 
         {/* Agent Dashboard Routes */}
-        <Route path="/agent" element={<DashboardLayout role="AGENT" />}>
-          <Route index element={<Navigate to="/agent/home" replace />} />
-          <Route path="home" element={<AgentHome />} />
-          <Route path="listings" element={<AgentListings />} />
-          <Route path="holdings" element={<Holdings />} />
-          <Route
-            path="notifications"
-            element={<Notifications role="AGENT" />}
-          />
-          <Route path="profile" element={<Profile role="AGENT" />} />
-          <Route path="about" element={<About />} />
-          <Route path="settings" element={<Settings />} />
+        <Route element={<ProtectedRoute allowedRole="AGENT" />}>
+          <Route path="/agent" element={<DashboardLayout role="AGENT" />}>
+            <Route index element={<Navigate to="/agent/home" replace />} />
+            <Route path="home" element={<AgentHome />} />
+            <Route path="listings" element={<AgentListings />} />
+            <Route path="holdings" element={<Holdings />} />
+            <Route
+              path="notifications"
+              element={<Notifications role="AGENT" />}
+            />
+            <Route path="profile" element={<Profile role="AGENT" />} />
+            <Route path="about" element={<About />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
         </Route>
 
         {/* User Dashboard Routes */}
-        <Route path="/user" element={<DashboardLayout role="USER" />}>
-          <Route index element={<Navigate to="/user/home" replace />} />
-          <Route path="home" element={<UserHome />} />
-          <Route path="properties" element={<MyProperties />} />
-          <Route path="notifications" element={<Notifications role="USER" />} />
-          <Route path="profile" element={<Profile role="USER" />} />
-          <Route path="about" element={<About />} />
-          <Route path="settings" element={<Settings />} />
+        <Route element={<ProtectedRoute allowedRole="USER" />}>
+          <Route path="/user" element={<DashboardLayout role="USER" />}>
+            <Route index element={<Navigate to="/user/home" replace />} />
+            <Route path="home" element={<UserHome />} />
+            <Route path="properties" element={<MyProperties />} />
+            <Route
+              path="notifications"
+              element={<Notifications role="USER" />}
+            />
+            <Route path="profile" element={<Profile role="USER" />} />
+            <Route path="about" element={<About />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
         </Route>
 
         {/* Fallback */}

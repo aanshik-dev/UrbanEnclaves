@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import API from "../../api/axios";
 import {
   Search,
   Filter,
@@ -13,102 +14,62 @@ import {
 import PropertyCarousel from "./PropertyCarousel";
 import FilterPanel from "./FilterPanel";
 
-const properties = [
-  {
-    id: 1,
-    title: "Skyline Luxury Apartment",
-    location: "G.S. Road, Guwahati",
-    price: "₹85,00,000",
-    status: "FOR SALE",
-    type: "Apartment",
-    bhk: 3,
-    bath: 2,
-    size: "1500 sq.ft",
-    images: [
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop",
-    ],
-    agent: {
-      name: "Rahul Kapoor",
-      aid: "AG-2024-001",
-      rating: 4.8,
-      image: "RK",
-    },
-    owner: {
-      name: "Suresh Mehra",
-      phone: "+91 98765 43210",
-    },
-    yearBuilt: 2024,
-    description:
-      "Experience luxury living in the heart of the city. This 3BHK apartment offers breathtaking views and modern amenities. The property features high-end finishes, a spacious balcony, and access to a premium clubhouse and gym.",
-  },
-  {
-    id: 2,
-    title: "Green Valley Villa",
-    location: "Zoo Road, Guwahati",
-    price: "₹45,000/mo",
-    status: "FOR RENT",
-    type: "Villa",
-    bhk: 4,
-    bath: 3,
-    size: "2200 sq.ft",
-    images: [
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
-    ],
-    agent: {
-      name: "Priya Singh",
-      aid: "AG-2024-002",
-      rating: 4.9,
-      image: "PS",
-    },
-    owner: {
-      name: "Anita Das",
-      phone: "+91 98765 43211",
-    },
-    yearBuilt: 2022,
-    description:
-      "Spacious 4BHK villa with a private garden and high-end finishes. Perfect for families looking for comfort and style. Part of a gated community with 24/7 security.",
-  },
-  {
-    id: 3,
-    title: "Modern Studio Loft",
-    location: "Dispur, Guwahati",
-    price: "₹35,00,000",
-    status: "SOLD",
-    type: "Apartment",
-    bhk: 1,
-    bath: 1,
-    size: "650 sq.ft",
-    images: [
-      "https://images.unsplash.com/photo-1536376074432-bc42fa45c170?q=80&w=2070&auto=format&fit=crop",
-    ],
-    agent: {
-      name: "Amit Verma",
-      aid: "AG-2024-003",
-      rating: 4.7,
-      image: "AV",
-    },
-    owner: {
-      name: "Rajesh Kumar",
-      phone: "+91 98765 43212",
-    },
-    yearBuilt: 2023,
-    description:
-      "Compact and stylish studio loft ideal for young professionals. Located in a prime business district.",
-  },
-];
-
 export default function TrackProperties() {
-  const [selectedProperty, setSelectedProperty] = useState(properties[0]);
+  const [propertyData, setPropertyData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredProperties = properties.filter(
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      try {
+        const response = await API.get("/api/properties/me/properties");
+        setPropertyData(response.data.data);
+        console.log(response.data.data);
+
+        if (response.data.data.length > 0) {
+          setSelectedProperty(response.data.data[0]);
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching property data:",
+          error.response?.data || error.message,
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPropertyData();
+  }, []);
+
+  const filteredProperties = propertyData.filter(
     (p) =>
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.location.toLowerCase().includes(searchQuery.toLowerCase()),
+      p.locality.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.pin.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.type.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  console.log(filteredProperties);
+
+  if (loading) {
+    return (
+      <div className="h-96 flex items-center justify-center text-zinc-500 font-medium animate-pulse">
+        Loading Dashboard Analytics...
+      </div>
+    );
+  }
+
+  if (!propertyData) {
+    return (
+      <div className="h-96 flex items-center justify-center text-zinc-500 font-medium">
+        No Property Data Available
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)]">
@@ -180,44 +141,46 @@ export default function TrackProperties() {
               <div className="flex gap-3">
                 <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
                   <img
-                    src={property.images[0]}
-                    alt={property.title}
+                    src={property.images.length > 0 ? property.images[0] : ""}
+                    alt={`property #${property.id}`}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-0.5">
                     <span
-                      className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full ${
-                        property.status === "SOLD"
+                      className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500`}
+                    >
+                      #{property.id}
+                    </span>
+                    <span
+                      className={`font-bold text-xs ${
+                        property.type === "FLAT"
                           ? "bg-rose-500/10 text-rose-500"
                           : "bg-emerald-500/10 text-emerald-500"
                       }`}
                     >
-                      {property.status}
-                    </span>
-                    <span className="text-orange-500 font-bold text-xs">
-                      {property.price}
+                      {property.type}
                     </span>
                   </div>
                   <h3 className="text-white font-bold truncate text-sm mb-0.5">
-                    {property.title}
+                    {`${property.BHK} BHK in ${property.locality}`}
                   </h3>
                   <div className="flex items-center gap-1 text-zinc-500 text-[10px] mb-1.5">
                     <MapPin size={10} />
-                    <span className="truncate">{property.location}</span>
+                    <span className="truncate">{`${property.houseNo}, ${property.area}, ${property.city}`}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-lg bg-orange-500/20 flex items-center justify-center text-[9px] font-bold text-orange-500">
-                        {property.agent.image}
+                        {property.owner.name.substring(0, 2)}
                       </div>
                       <span className="text-zinc-400 text-[9px] font-bold truncate max-w-[80px]">
-                        {property.agent.name}
+                        {property.owner.name}
                       </span>
                     </div>
                     <span className="text-zinc-600 text-[9px] font-bold">
-                      {property.yearBuilt}
+                      {property.year_built}
                     </span>
                   </div>
                 </div>
@@ -228,47 +191,40 @@ export default function TrackProperties() {
 
         {/* Property Detail Panel */}
         <div className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-y-auto scrollbar-hide flex flex-col backdrop-blur-sm">
-          <div className="h-[350px] min-h-[350px] relative group">
+          <div className="h-[400px] min-h-[400px] relative group">
             <PropertyCarousel
               images={selectedProperty.images}
-              title={selectedProperty.title}
+              title={`${selectedProperty.BHK} BHK in ${selectedProperty.locality}`}
             />
             <div className="absolute bottom-6 left-8 pointer-events-none">
               <div className="flex items-center gap-3 mb-2">
                 <span className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
-                  {selectedProperty.status}
+                  {selectedProperty.type}
                 </span>
                 <span className="text-white/80 text-xs font-medium flex items-center gap-1">
-                  <MapPin size={12} /> {selectedProperty.location}
+                  <MapPin size={12} />{" "}
+                  {`${selectedProperty.houseNo}, ${selectedProperty.locality}, ${selectedProperty.area}, ${selectedProperty.city} - ${selectedProperty.pin}`}
                 </span>
               </div>
               <h2 className="text-2xl font-bold text-white tracking-tight">
-                {selectedProperty.title}
+                {`${selectedProperty.BHK} BHK in ${selectedProperty.locality}`}
               </h2>
             </div>
             <div className="absolute bottom-6 right-8 pointer-events-none">
               <p className="text-2xl font-bold text-orange-500">
-                {selectedProperty.price}
+                #{selectedProperty.id}
               </p>
             </div>
           </div>
 
           <div className="p-6">
-            <div className="grid grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-3 gap-3 mb-6">
               <div className="bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-center">
                 <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
                   BHK
                 </p>
                 <p className="text-white font-bold text-sm">
-                  {selectedProperty.bhk}
-                </p>
-              </div>
-              <div className="bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-center">
-                <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
-                  Baths
-                </p>
-                <p className="text-white font-bold text-sm">
-                  {selectedProperty.bath}
+                  {selectedProperty.BHK}
                 </p>
               </div>
               <div className="bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-center">
@@ -284,12 +240,12 @@ export default function TrackProperties() {
                   Year
                 </p>
                 <p className="text-white font-bold text-sm">
-                  {selectedProperty.yearBuilt}
+                  {selectedProperty.year_built}
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4">
               <div className="space-y-6">
                 <h4 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
                   <Activity className="text-orange-500" size={16} /> Property
@@ -298,7 +254,7 @@ export default function TrackProperties() {
                 <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-zinc-400 text-xs font-medium">
-                      Listing Type
+                      Property Type
                     </span>
                     <span className="text-white font-bold text-xs">
                       {selectedProperty.type}
@@ -306,63 +262,66 @@ export default function TrackProperties() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-zinc-400 text-xs font-medium">
-                      Owner Name
+                      Property ID
                     </span>
                     <span className="text-white font-bold text-xs">
-                      {selectedProperty.owner.name}
+                      {selectedProperty.id}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-zinc-400 text-xs font-medium">
-                      Owner Contact
+                      Handler Office
                     </span>
                     <span className="text-white font-bold text-xs">
-                      {selectedProperty.owner.phone}
+                      {selectedProperty.office.officeName}
                     </span>
                   </div>
-                </div>
-                <div>
-                  <h4 className="text-white font-bold mb-2 flex items-center gap-2 text-sm">
-                    <Info className="text-orange-500" size={16} /> Description
-                  </h4>
-                  <p className="text-zinc-400 text-sm leading-relaxed font-medium">
-                    {selectedProperty.description}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400 text-xs font-medium">
+                      Office Contact
+                    </span>
+                    <span className="text-white font-bold text-xs">
+                      +91 {selectedProperty.office.officeContact}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <h4 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
-                  <Briefcase className="text-orange-500" size={16} /> Assigned
-                  Agent
+                  <Briefcase className="text-orange-500" size={16} /> Owner
+                  details
                 </h4>
                 <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20">
-                      {selectedProperty.agent.image}
+                      {selectedProperty.owner.name.substring(0, 2)}
                     </div>
                     <div>
                       <h5 className="text-white font-bold text-sm">
-                        {selectedProperty.agent.name}
+                        {selectedProperty.owner.name}
                       </h5>
                       <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-0.5">
-                        {selectedProperty.agent.aid}
+                        {selectedProperty.owner.phone}
                       </p>
-                      <div className="flex items-center gap-1 text-orange-500">
-                        <Star size={12} fill="currentColor" />
-                        <span className="text-[10px] font-bold">
-                          {selectedProperty.agent.rating} Rating
-                        </span>
-                      </div>
                     </div>
                   </div>
                   <button
                     type="button"
                     className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-all text-xs flex items-center justify-center gap-2"
                   >
-                    View Agent Performance <ArrowUpRight size={14} />
+                    View Profile <ArrowUpRight size={14} />
                   </button>
                 </div>
+              </div>
+
+              <div className="col-span-2 mb-3 mx-3">
+                <h4 className="text-white font-bold mb-2 flex items-center gap-2 text-sm">
+                  <Info className="text-orange-500" size={16} /> Description
+                </h4>
+                <p className="text-zinc-400 text-sm leading-relaxed font-medium">
+                  {null || "No description available."}
+                </p>
               </div>
             </div>
           </div>

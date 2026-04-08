@@ -7,34 +7,58 @@ const team = [
     role: "Lead Developer",
     id: "2401037",
     image: "AT",
-    socials: { github: "#", twitter: "#", linkedin: "#" },
+    contribution: [
+      "Architected the React frontend infrastructure and global state management.",
+      "Implemented JWT-based authentication flow with silent refresh token logic.",
+      "Developed the dynamic Admin and Agent dashboards with real-time analytics visualization.",
+      "Integrated Axios interceptors for global API error handling and debugging."
+    ],
+    socials: { github: "#", linkedin: "#" },
   },
   {
     name: "Anuved Pratap Singh",
     role: "Database Architect",
     id: "2401041",
     image: "AS",
-    socials: { github: "#", twitter: "#", linkedin: "#" },
+    contribution: [
+      "Designed the relational schema for properties, agents, and transactions.",
+      "Optimized complex SQL queries for the Raw Query Editor feature.",
+      "Implemented database constraints and triggers to ensure data integrity.",
+      "Managed data migration and initial seeding for the DBMS demonstration."
+    ],
+    socials: { github: "#", linkedin: "#" },
   },
   {
     name: "Anmol Kumar",
     role: "UI/UX Designer",
     id: "2401031",
     image: "AK",
-    socials: { github: "#", twitter: "#", linkedin: "#" },
+    contribution: [
+      "Crafted the visual identity and 'Urban Enclaves' design system.",
+      "Designed high-fidelity wireframes for the seamless property tracking interface.",
+      "Developed custom CSS/Tailwind animations and responsive layout structures.",
+      "Conducted usability testing to refine the multi-role navigation flow."
+    ],
+    socials: { github: "#", linkedin: "#" },
   },
   {
     name: "Anmol Kumar",
     role: "Backend Engineer",
     id: "2401032",
     image: "AK",
-    socials: { github: "#", twitter: "#", linkedin: "#" },
+    contribution: [
+      "Built robust REST APIs using Spring Boot and Spring Security.",
+      "Implemented role-based access control (RBAC) logic for different user types.",
+      "Developed the transaction processing logic and financial record services.",
+      "Created DTO layers for optimized data transfer between server and client."
+    ],
+    socials: { github: "#", linkedin: "#" },
   },
 ];
 
 export default function About() {
   return (
-    <div className="max-w-6xl mx-auto space-y-16">
+    <div className="max-w-5xl mx-auto space-y-24 pb-20">
       {/* Hero Section */}
       <div className="text-center space-y-6">
         <motion.div
@@ -49,103 +73,70 @@ export default function About() {
           <span className="text-orange-500">Starts Here.</span>
         </h1>
         <p className="text-zinc-400 text-lg font-medium max-w-2xl mx-auto leading-relaxed">
-          Urban Enclaves is a state-of-the-art real estate management system
-          designed to bring transparency, efficiency, and elite performance to
-          the property market.
+          Built as a comprehensive DBMS project to demonstrate modern data management 
+          and professional UI/UX standards in property tech.
         </p>
       </div>
 
-      {/* Mission Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-          {
-            title: "Transparency",
-            desc: "Direct communication between owners, agents, and buyers with real-time tracking.",
-            icon: "lucide:globe",
-          },
-          {
-            title: "Efficiency",
-            desc: "Robust SQL-powered query system for instant data retrieval and analysis.",
-            icon: "lucide:users",
-          },
-          {
-            title: "Innovation",
-            desc: "Modern UI/UX designed for high-performance real estate operations.",
-            icon: "lucide:heart",
-          },
-        ].map((item, i) => (
-          <motion.div
-            key={item.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-[2.5rem] backdrop-blur-sm group hover:border-orange-500/30 transition-all"
-          >
-            <div className="p-4 bg-orange-500/10 rounded-2xl text-orange-500 w-fit mb-6 group-hover:scale-110 transition-transform">
-              <Icon icon={item.icon} width="28" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
-            <p className="text-zinc-500 text-sm font-medium leading-relaxed">
-              {item.desc}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Team Section */}
+      {/* Detailed Team Section */}
       <div className="space-y-12">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Meet the Developers
-          </h2>
-          <p className="text-zinc-500 font-medium">
-            A dedicated team of 4 working to revolutionize real estate.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-800 pb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Development Team</h2>
+            <p className="text-zinc-500 font-medium">Detailed contributions and core responsibilities.</p>
+          </div>
+          <div className="text-orange-500 font-mono text-sm bg-orange-500/5 px-4 py-2 rounded-lg border border-orange-500/10">
+            CS241 - Database Management Systems
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="space-y-8">
           {team.map((member, i) => (
             <motion.div
               key={member.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-[2.5rem] text-center backdrop-blur-sm group hover:border-orange-500/30 transition-all relative overflow-hidden"
+              initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="group relative bg-zinc-900/40 border border-zinc-800 rounded-[2.5rem] p-8 md:p-12 hover:border-orange-500/20 transition-all overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative z-10">
-                <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-3xl font-bold shadow-xl shadow-orange-500/20 mx-auto mb-6 group-hover:scale-110 transition-transform duration-500">
-                  {member.image}
-                </div>
-                <h4 className="text-xl font-bold text-white mb-1">
-                  {member.name}
-                </h4>
-                <p className="text-orange-500 text-xs font-bold uppercase tracking-widest mb-2">
-                  {member.role}
-                </p>
-                <p className="text-zinc-500 text-xs font-medium mb-6">
-                  ID: {member.id}
-                </p>
+              {/* Background Glow */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[100px] -mr-32 -mt-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-                <div className="flex items-center justify-center gap-3">
-                  <a
-                    href={member.socials.github}
-                    className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all"
-                  >
-                    <Icon icon="lucide:github" width="18" />
-                  </a>
-                  <a
-                    href={member.socials.twitter}
-                    className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all"
-                  >
-                    <Icon icon="lucide:twitter" width="18" />
-                  </a>
-                  <a
-                    href={member.socials.linkedin}
-                    className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all"
-                  >
-                    <Icon icon="lucide:linkedin" width="18" />
-                  </a>
+              <div className="flex flex-col lg:flex-row gap-10 relative z-10">
+                {/* Profile Side */}
+                <div className="lg:w-1/3 space-y-6 text-center lg:text-left">
+                  <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-4xl font-bold shadow-2xl shadow-orange-500/20 mx-auto lg:mx-0">
+                    {member.image}
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white mb-1">{member.name}</h3>
+                    <p className="text-orange-500 font-bold text-sm uppercase tracking-widest mb-4">{member.role}</p>
+                    <p className="text-zinc-500 text-xs font-mono bg-zinc-800/50 w-fit px-3 py-1 rounded-md mx-auto lg:mx-0">ID: {member.id}</p>
+                  </div>
+                  <div className="flex items-center justify-center lg:justify-start gap-4 pt-2">
+                    <a href={member.socials.github} className="text-zinc-500 hover:text-white transition-colors">
+                      <Icon icon="lucide:github" width="22" />
+                    </a>
+                    <a href={member.socials.linkedin} className="text-zinc-500 hover:text-white transition-colors">
+                      <Icon icon="lucide:linkedin" width="22" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Contribution Side */}
+                <div className="lg:w-2/3">
+                  <h4 className="text-white font-bold mb-6 flex items-center gap-2">
+                    <Icon icon="lucide:terminal" className="text-orange-500" width="18" />
+                    Core Contributions
+                  </h4>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {member.contribution.map((item, idx) => (
+                      <li key={idx} className="flex gap-3 p-4 bg-zinc-950/40 border border-zinc-800/50 rounded-2xl text-zinc-400 text-sm leading-relaxed">
+                        <Icon icon="lucide:check-circle-2" className="text-orange-500 mt-1 flex-shrink-0" width="16" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </motion.div>
@@ -155,24 +146,13 @@ export default function About() {
 
       {/* Footer Info */}
       <div className="bg-zinc-900/50 border border-zinc-800 p-12 rounded-[3rem] backdrop-blur-sm text-center space-y-6">
-        <h3 className="text-2xl font-bold text-white">
-          Built for CS241 - DBMS Project
-        </h3>
-        <p className="text-zinc-500 font-medium max-w-xl mx-auto">
-          This project demonstrates a complete real estate ecosystem with robust
-          database management, role-based access control, and modern UI/UX
-          principles.
+        <div className="w-16 h-1 bg-orange-500 mx-auto rounded-full mb-4"></div>
+        <h3 className="text-2xl font-bold text-white">System Architecture</h3>
+        <p className="text-zinc-500 font-medium max-w-2xl mx-auto">
+          Urban Enclaves utilizes a <span className="text-white">React-Vite</span> frontend, 
+          a <span className="text-white">Spring Boot</span> microservice backend, and a 
+          <span className="text-white">MySQL</span> relational database to deliver high-performance property management.
         </p>
-        <div className="flex items-center justify-center gap-6 pt-4">
-          <div className="flex items-center gap-2 text-zinc-400 text-sm font-bold">
-            <Icon icon="lucide:mail" width="18" className="text-orange-500" />{" "}
-            contact@urbanenclaves.com
-          </div>
-          <div className="flex items-center gap-2 text-zinc-400 text-sm font-bold">
-            <Icon icon="lucide:globe" width="18" className="text-orange-500" />{" "}
-            www.urbanenclaves.com
-          </div>
-        </div>
       </div>
     </div>
   );
