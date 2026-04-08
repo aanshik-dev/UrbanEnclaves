@@ -4,27 +4,40 @@ import { Icon } from "@iconify/react";
 const team = [
   {
     name: "Ansik Singh Tomar",
-    role: "Lead Developer",
+    role: "Lead Frontend Developer",
     id: "2401037",
     image: "AT",
     contribution: [
       "Architected the React frontend infrastructure and global state management.",
-      "Implemented JWT-based authentication flow with silent refresh token logic.",
+      "Integrated JWT-based authentication flow with silent refresh token logic, to the fronted",
       "Developed the dynamic Admin and Agent dashboards with real-time analytics visualization.",
-      "Integrated Axios interceptors for global API error handling and debugging."
+      "Integrated Axios interceptors for global API error handling and debugging.",
     ],
     socials: { github: "#", linkedin: "#" },
   },
   {
     name: "Anuved Pratap Singh",
-    role: "Database Architect",
+    role: "Lead Backend Developer and Database Architect",
     id: "2401041",
     image: "AS",
     contribution: [
-      "Designed the relational schema for properties, agents, and transactions.",
-      "Optimized complex SQL queries for the Raw Query Editor feature.",
-      "Implemented database constraints and triggers to ensure data integrity.",
-      "Managed data migration and initial seeding for the DBMS demonstration."
+      "Architected a robust relational database schema for properties, listings, agents, and transactions.",
+      "Engineered RESTful APIs for property, listing token, and image management with a focus on scalability.",
+      "Built and maintained data scraping workflows ensuring consistency, normalization, and reliability of data.",
+      "Enhanced query performance by optimizing complex SQL operations used in analytics and query tools.",
+    ],
+    socials: { github: "#", linkedin: "#" },
+  },
+  {
+    name: "Anmol Kumar",
+    role: "Lead Backend Developer and System Designer",
+    id: "2401032",
+    image: "AK",
+    contribution: [
+      "Designed the complete backend system architecture and developed scalable REST APIs using Spring Boot following layered architecture",
+      "Implemented secure authentication and authorization using JWT with role-based access control for User, Admin, Office, and Agent modules",
+      "Applied Strategy Design Pattern to build flexible API architecture, enabling easier frontend integration and extensibility",
+      "Developed analytics and revenue tracking system with optimized and complex database queries for efficient data processing and reporting.",
     ],
     socials: { github: "#", linkedin: "#" },
   },
@@ -34,23 +47,10 @@ const team = [
     id: "2401031",
     image: "AK",
     contribution: [
-      "Crafted the visual identity and 'Urban Enclaves' design system.",
-      "Designed high-fidelity wireframes for the seamless property tracking interface.",
-      "Developed custom CSS/Tailwind animations and responsive layout structures.",
-      "Conducted usability testing to refine the multi-role navigation flow."
-    ],
-    socials: { github: "#", linkedin: "#" },
-  },
-  {
-    name: "Anmol Kumar",
-    role: "Backend Engineer",
-    id: "2401032",
-    image: "AK",
-    contribution: [
-      "Built robust REST APIs using Spring Boot and Spring Security.",
-      "Implemented role-based access control (RBAC) logic for different user types.",
-      "Developed the transaction processing logic and financial record services.",
-      "Created DTO layers for optimized data transfer between server and client."
+      "Designed intuitive and user-friendly interfaces with a focus on usability and accessibility.",
+      "Created wireframes, prototypes, and user flows to enhance user experience across the platform.",
+      "Collaborated with developers to ensure seamless implementation of design systems.",
+      "Conducted user research and usability testing to improve interaction and visual design.",
     ],
     socials: { github: "#", linkedin: "#" },
   },
@@ -73,8 +73,8 @@ export default function About() {
           <span className="text-orange-500">Starts Here.</span>
         </h1>
         <p className="text-zinc-400 text-lg font-medium max-w-2xl mx-auto leading-relaxed">
-          Built as a comprehensive DBMS project to demonstrate modern data management 
-          and professional UI/UX standards in property tech.
+          Built as a comprehensive DBMS project to demonstrate modern data
+          management and professional UI/UX standards in property tech.
         </p>
       </div>
 
@@ -82,8 +82,12 @@ export default function About() {
       <div className="space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-800 pb-8">
           <div>
-            <h2 className="text-3xl font-bold text-white mb-2">Development Team</h2>
-            <p className="text-zinc-500 font-medium">Detailed contributions and core responsibilities.</p>
+            <h2 className="text-3xl font-bold text-white mb-2">
+              Development Team
+            </h2>
+            <p className="text-zinc-500 font-medium">
+              Detailed contributions and core responsibilities.
+            </p>
           </div>
           <div className="text-orange-500 font-mono text-sm bg-orange-500/5 px-4 py-2 rounded-lg border border-orange-500/10">
             CS241 - Database Management Systems
@@ -109,15 +113,27 @@ export default function About() {
                     {member.image}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white mb-1">{member.name}</h3>
-                    <p className="text-orange-500 font-bold text-sm uppercase tracking-widest mb-4">{member.role}</p>
-                    <p className="text-zinc-500 text-xs font-mono bg-zinc-800/50 w-fit px-3 py-1 rounded-md mx-auto lg:mx-0">ID: {member.id}</p>
+                    <h3 className="text-2xl font-bold text-white mb-1">
+                      {member.name}
+                    </h3>
+                    <p className="text-orange-500 font-bold text-sm uppercase tracking-widest mb-4">
+                      {member.role}
+                    </p>
+                    <p className="text-zinc-500 text-xs font-mono bg-zinc-800/50 w-fit px-3 py-1 rounded-md mx-auto lg:mx-0">
+                      ID: {member.id}
+                    </p>
                   </div>
                   <div className="flex items-center justify-center lg:justify-start gap-4 pt-2">
-                    <a href={member.socials.github} className="text-zinc-500 hover:text-white transition-colors">
+                    <a
+                      href={member.socials.github}
+                      className="text-zinc-500 hover:text-white transition-colors"
+                    >
                       <Icon icon="lucide:github" width="22" />
                     </a>
-                    <a href={member.socials.linkedin} className="text-zinc-500 hover:text-white transition-colors">
+                    <a
+                      href={member.socials.linkedin}
+                      className="text-zinc-500 hover:text-white transition-colors"
+                    >
                       <Icon icon="lucide:linkedin" width="22" />
                     </a>
                   </div>
@@ -126,13 +142,24 @@ export default function About() {
                 {/* Contribution Side */}
                 <div className="lg:w-2/3">
                   <h4 className="text-white font-bold mb-6 flex items-center gap-2">
-                    <Icon icon="lucide:terminal" className="text-orange-500" width="18" />
+                    <Icon
+                      icon="lucide:terminal"
+                      className="text-orange-500"
+                      width="18"
+                    />
                     Core Contributions
                   </h4>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {member.contribution.map((item, idx) => (
-                      <li key={idx} className="flex gap-3 p-4 bg-zinc-950/40 border border-zinc-800/50 rounded-2xl text-zinc-400 text-sm leading-relaxed">
-                        <Icon icon="lucide:check-circle-2" className="text-orange-500 mt-1 flex-shrink-0" width="16" />
+                      <li
+                        key={idx}
+                        className="flex gap-3 p-4 bg-zinc-950/40 border border-zinc-800/50 rounded-2xl text-zinc-400 text-sm leading-relaxed"
+                      >
+                        <Icon
+                          icon="lucide:check-circle-2"
+                          className="text-orange-500 mt-1 flex-shrink-0"
+                          width="16"
+                        />
                         {item}
                       </li>
                     ))}
@@ -149,9 +176,11 @@ export default function About() {
         <div className="w-16 h-1 bg-orange-500 mx-auto rounded-full mb-4"></div>
         <h3 className="text-2xl font-bold text-white">System Architecture</h3>
         <p className="text-zinc-500 font-medium max-w-2xl mx-auto">
-          Urban Enclaves utilizes a <span className="text-white">React-Vite</span> frontend, 
-          a <span className="text-white">Spring Boot</span> microservice backend, and a 
-          <span className="text-white">MySQL</span> relational database to deliver high-performance property management.
+          Urban Enclaves utilizes a{" "}
+          <span className="text-white">React-Vite</span> frontend, a{" "}
+          <span className="text-white">Spring Boot</span> microservice backend,
+          and a<span className="text-white">MySQL</span> relational database to
+          deliver high-performance property management.
         </p>
       </div>
     </div>

@@ -2,30 +2,58 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
 
-const developers = [
+const team = [
   {
-    name: "Member 1",
-    role: "Database Architect",
-    desc: "Designed the complete ER model and relational schema including entities like Users, Properties, Agents, Transactions, and Notifications. Ensured BCNF normalization and optimized query performance.",
-    img: "https://i.pravatar.cc/150?img=1",
+    name: "Ansik Singh Tomar",
+    role: "Lead Frontend Developer",
+    id: "2401037",
+    image: "AT",
+    contribution: [
+      "Architected the React frontend infrastructure and global state management.",
+      "Integrated JWT-based authentication flow with silent refresh token logic.",
+      "Developed dynamic Admin and Agent dashboards with real-time analytics.",
+      "Integrated Axios interceptors for global API error handling.",
+    ],
+    socials: { github: "#", linkedin: "#" },
   },
   {
-    name: "Member 2",
-    role: "Frontend Developer",
-    desc: "Built a modern, responsive UI using React and Tailwind. Focused on smooth animations, UX, and visual consistency across the platform.",
-    img: "https://i.pravatar.cc/150?img=2",
+    name: "Anuved Pratap Singh",
+    role: "Lead Backend Developer and Database Architect",
+    id: "2401041",
+    image: "AS",
+    contribution: [
+      "Architected a robust relational database schema for properties, listings, agents, and transactions.",
+      "Engineered scalable REST APIs for property, listing token, and image management.",
+      "Built data scraping workflows ensuring consistency and normalization.",
+      "Optimized complex SQL queries for analytics and query tools.",
+    ],
+    socials: { github: "#", linkedin: "#" },
   },
   {
-    name: "Member 3",
-    role: "Backend & API Engineer",
-    desc: "Developed APIs and handled integration between frontend and database. Ensured scalability and efficient data handling.",
-    img: "https://i.pravatar.cc/150?img=3",
+    name: "Anmol Kumar",
+    role: "Lead Backend Developer and System Designer",
+    id: "2401032",
+    image: "AK",
+    contribution: [
+      "Designed backend architecture and scalable REST APIs using Spring Boot.",
+      "Implemented JWT authentication with role-based access control.",
+      "Applied Strategy Design Pattern for flexible API architecture.",
+      "Built analytics and revenue tracking system with optimized queries.",
+    ],
+    socials: { github: "#", linkedin: "#" },
   },
   {
-    name: "Member 4",
-    role: "Testing & Optimization",
-    desc: "Performed system testing, debugging, and optimization. Improved performance and ensured reliability of the system.",
-    img: "https://i.pravatar.cc/150?img=4",
+    name: "Anmol Kumar",
+    role: "UI/UX Designer",
+    id: "2401031",
+    image: "AK",
+    contribution: [
+      "Designed intuitive UI with focus on usability and accessibility.",
+      "Created wireframes, prototypes, and user flows.",
+      "Collaborated with developers for design implementation.",
+      "Conducted usability testing and research.",
+    ],
+    socials: { github: "#", linkedin: "#" },
   },
 ];
 
@@ -52,7 +80,6 @@ const card = {
 const About = () => {
   return (
     <div className="min-h-screen bg-zinc-950 text-white px-6 py-40">
-
       {/* ABOUT */}
       <div className="max-w-5xl mx-auto text-center mb-24">
         <motion.h1
@@ -89,10 +116,10 @@ const About = () => {
         </motion.p>
       </div>
 
-      {/* DEVELOPERS */}
+      {/* TEAM */}
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl font-bold text-center mb-16">
-          Meet the <span className="text-orange-500">Developers</span>
+          Meet the <span className="text-orange-500">Team</span>
         </h2>
 
         <motion.div
@@ -102,51 +129,62 @@ const About = () => {
           viewport={{ once: true }}
           className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
         >
-          {developers.map((dev, index) => (
+          {team.map((dev, index) => (
             <motion.div
               key={index}
               variants={card}
-              whileHover={{
-                scale: 1.05,
-                y: -10,
-              }}
+              whileHover={{ scale: 1.05, y: -10 }}
               className="relative group"
             >
-              {/* Glow Effect */}
+              {/* Glow */}
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-orange-500/20 to-orange-700/10 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
 
               {/* Card */}
               <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 transition-all duration-300 group-hover:border-orange-500/50">
-                
-                {/* Image */}
+                {/* Avatar */}
                 <div className="flex justify-center mb-4">
-                  <img
-                    src={dev.img}
-                    alt={dev.name}
-                    className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700 group-hover:border-orange-500 transition-all duration-300"
-                  />
+                  <div className="w-20 h-20 rounded-full bg-orange-500/20 flex items-center justify-center text-xl font-bold border-2 border-zinc-700 group-hover:border-orange-500 transition-all duration-300">
+                    {dev.image}
+                  </div>
                 </div>
 
                 {/* Info */}
                 <h3 className="text-xl font-semibold text-center mb-1">
                   {dev.name}
                 </h3>
+
+                <p className="text-xs text-zinc-500 text-center mb-1">
+                  ROLL NO: {dev.id}
+                </p>
+
                 <p className="text-orange-400 text-sm text-center mb-3">
                   {dev.role}
                 </p>
 
-                <p className="text-zinc-400 text-sm text-center leading-relaxed mb-4">
-                  {dev.desc}
-                </p>
+                {/* Contributions */}
+                <ul className="text-zinc-400 text-sm space-y-2 mb-4">
+                  {dev.contribution.map((point, i) => (
+                    <li key={i} className="text-center">
+                      • {point}
+                    </li>
+                  ))}
+                </ul>
 
                 {/* Icons */}
                 <div className="flex justify-center gap-4 text-zinc-400">
-                  <Icon icon="mdi:github" className="hover:text-orange-500 cursor-pointer transition" />
-                  <Icon icon="mdi:email-outline" className="hover:text-orange-500 cursor-pointer transition" />
-                  <Icon icon="mdi:phone-outline" className="hover:text-orange-500 cursor-pointer transition" />
-                  <Icon icon="mdi:linkedin" className="hover:text-orange-500 cursor-pointer transition" />
+                  <Icon
+                    icon="mdi:github"
+                    className="hover:text-orange-500 cursor-pointer transition"
+                  />
+                  <Icon
+                    icon="mdi:linkedin"
+                    className="hover:text-orange-500 cursor-pointer transition"
+                  />
+                  <Icon
+                    icon="mdi:email-outline"
+                    className="hover:text-orange-500 cursor-pointer transition"
+                  />
                 </div>
-
               </div>
             </motion.div>
           ))}

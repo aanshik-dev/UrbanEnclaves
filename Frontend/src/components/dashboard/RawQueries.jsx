@@ -14,42 +14,109 @@ import {
 const sampleQueries = [
   {
     id: 1,
-    title: "Guwahati Rentals built after 2023",
-    query:
-      "SELECT p.ID, p.House_No, p.city, p.Area, lt.list_type, p.year_built FROM Property p JOIN Listing_Token lt ON p.ID = lt.PID where p.city = 'Delhi' and p.year_built > 2016 and lt.List_Type = 'SELL';",
+    title: "Mumbai Rentals built after 2010",
+    query: `SELECT 
+    p.id AS property_id,
+    p.city,
+    p.type,
+    p.year_built,
+    lt.id AS listing_token_id
+FROM property p 
+JOIN listing_token lt 
+    ON p.id = lt.property_id 
+WHERE p.city = 'Mumbai' 
+  AND lt.list_type = 'RENT' 
+  AND p.year_built > 2010;`,
   },
   {
     id: 2,
     title: "Price Range 20L-60L",
-    query:
-      "SELECT p.HouseNo, p.Locality, p.Area, p.City, lt.status FROM Property p JOIN Listing_Token lt ON p.PID = lt.PID WHERE lt.Price BETWEEN 2000000 AND 6000000;",
+    query: `SELECT 
+    p.id AS property_id, 
+    p.house_no, 
+    p.area, 
+    p.locality, 
+    p.city, 
+    lt.price 
+FROM property p 
+JOIN listing_token lt 
+    ON p.id = lt.property_id 
+WHERE p.city = 'Mumbai' 
+  AND lt.price BETWEEN 2000000 AND 6000000;`,
   },
   {
     id: 3,
-    title: "G.S. Road 2BHK < 15k",
-    query:
-      "SELECT Address FROM Property WHERE Locality = 'G.S. Road' AND BHK >= 2 AND Price < 15000 AND ListType = 'Rent';",
+    title: "Locality with atleast 2BHK under 50k",
+    query: `SELECT 
+    p.house_no, 
+    p.area, 
+    p.locality, 
+    p.city, 
+    lt.price AS monthly_rent,
+    p.bhk
+FROM property p 
+JOIN listing_token lt 
+    ON p.id = lt.property_id 
+WHERE p.locality = 'Andheri' 
+  AND lt.list_type = 'RENT' 
+  AND p.bhk >= 2 
+  AND lt.price < 50000
+ORDER BY lt.price ASC;`,
   },
   {
     id: 4,
     title: "Top Agent 2023",
-    query:
-      "SELECT Name FROM Agent JOIN Transaction ON Agent.AID = Transaction.AID WHERE YEAR(Date) = 2023 GROUP BY AID ORDER BY SUM(Amount) DESC LIMIT 1;",
+    query: `SELECT 
+    up.name AS agent_name, 
+    SUM(t.amount) AS total_sales_volume
+FROM user_profile up
+JOIN agent a 
+    ON up.user_id = a.agent_id
+JOIN transaction t 
+    ON a.agent_id = t.agent_id 
+WHERE YEAR(t.transaction_date) = 2023
+GROUP BY a.agent_id, up.name
+ORDER BY total_sales_volume DESC
+LIMIT 1;`,
   },
   {
     id: 5,
-    title: "Top Agent 2023",
-    query:
-      "SELECT Name FROM Agent JOIN Transaction ON Agent.AID = Transaction.AID WHERE YEAR(Date) = 2023 GROUP BY AID ORDER BY SUM(Amount) DESC LIMIT 1;",
+    title: "Agent Sales in 2023",
+    query: `SELECT a.agent_id, 
+    AVG(t.amount) AS avg_selling_price, 
+    AVG(DATEDIFF(t.transaction_date, lt.listing_date)) AS avg_days_on_market 
+FROM agent a 
+LEFT JOIN transaction t 
+    ON a.agent_id = t.agent_id 
+    AND YEAR(t.transaction_date) = 2023 
+LEFT JOIN listing_token lt 
+    ON t.token_id = lt.id 
+GROUP BY a.agent_id;`,
   },
   {
     id: 6,
-    title: "Top Agent 2023",
-    query:
-      "SELECT Name FROM Agent JOIN Transaction ON Agent.AID = Transaction.AID WHERE YEAR(Date) = 2023 GROUP BY AID ORDER BY SUM(Amount) DESC LIMIT 1;",
+    title: "Most Expensive Rental Property",
+    query: `SELECT 
+    p.id AS property_id,
+    p.house_no,
+    p.locality,
+    p.city,
+    p.type,
+    lt.price AS max_rent,
+    lt.status
+FROM property p 
+JOIN listing_token lt 
+    ON p.id = lt.property_id 
+WHERE lt.list_type = 'RENT' 
+  AND lt.status = 'ACTIVE'
+  AND lt.price = (
+      SELECT MAX(price) 
+      FROM listing_token 
+      WHERE list_type = 'RENT' 
+        AND status = 'ACTIVE'
+  );`,
   },
 ];
-
 
 export default function RawQueries() {
   const [query, setQuery] = useState("");
@@ -58,51 +125,47 @@ export default function RawQueries() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [error, setError] = useState(null);
 
-
-
   const handleExecute = async () => {
-  if (!query.trim()) return;
+    if (!query.trim()) return;
 
-  setIsExecuting(true);
-  setError(null);
-  setResults([]);
-  setColumns([]);
+    setIsExecuting(true);
+    setError(null);
+    setResults([]);
+    setColumns([]);
 
-  try {
-    // 1. Change to API.post since backend is now @PostMapping
-    // 2. Pass the payload directly as the second argument
-    const response = await API.post("/admin/query", { 
-      query: query 
-    });
+    try {
+      // 1. Change to API.post since backend is now @PostMapping
+      // 2. Pass the payload directly as the second argument
+      const response = await API.post("/admin/query", {
+        query: query,
+      });
 
-    // Based on your previous successful API calls, 
-    // your backend structure is: { data: { success: true, columns: [...], data: [...] } }
-    const serverPayload = response.data.data; 
+      // Based on your previous successful API calls,
+      // your backend structure is: { data: { success: true, columns: [...], data: [...] } }
+      const serverPayload = response.data.data;
 
-    if (serverPayload) {
-      // Set columns and rows dynamically from the server response
-      setColumns(serverPayload.columns || []);
-      setResults(serverPayload.data || []);
-      
-      // If the backend doesn't send a 'success' boolean but sends data, 
-      // we assume success. Otherwise, check for serverPayload.success
-      if (serverPayload.success === false) {
-        setError(serverPayload.message || "Query failed to execute.");
+      if (serverPayload) {
+        // Set columns and rows dynamically from the server response
+        setColumns(serverPayload.columns || []);
+        setResults(serverPayload.data || []);
+
+        // If the backend doesn't send a 'success' boolean but sends data,
+        // we assume success. Otherwise, check for serverPayload.success
+        if (serverPayload.success === false) {
+          setError(serverPayload.message || "Query failed to execute.");
+        }
       }
+    } catch (err) {
+      console.error("SQL Execution Error:", err);
+
+      // Using your global error logger structure
+      const errorMessage =
+        err.response?.data?.error?.message || "Failed to execute query.";
+      setError(errorMessage);
+    } finally {
+      setIsExecuting(false);
     }
-  } catch (err) {
-    console.error("SQL Execution Error:", err);
-    
-    // Using your global error logger structure
-    const errorMessage =
-      err.response?.data?.error?.message || "Failed to execute query.";
-    setError(errorMessage);
-  } finally {
-    setIsExecuting(false);
-  }
-};
-
-
+  };
 
   // const handleExecute = async () => {
   //   if (!query.trim()) return;
@@ -167,7 +230,7 @@ export default function RawQueries() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-        {/* Query Editor */}
+          {/* Query Editor */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-hidden backdrop-blur-sm">
             <div className="flex items-center justify-between px-8 py-4 border-b border-zinc-800/50 bg-zinc-900/80">
               <div className="flex items-center gap-2 text-orange-500">
@@ -222,15 +285,21 @@ export default function RawQueries() {
           </AnimatePresence>
 
           {/* Results Table */}
-                    {/* Results Table */}
+          {/* Results Table */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-hidden backdrop-blur-sm">
             <div className="flex items-center justify-between px-8 py-6 border-b border-zinc-800/50">
               <div className="flex items-center gap-2 text-white">
                 <TableIcon size={18} className="text-orange-500" />
                 <h3 className="text-lg font-bold">Query Results</h3>
-                <span className="ml-2 px-2 py-0.5 bg-zinc-800 rounded text-xs font-bold text-zinc-500">{results.length} Rows</span>
+                <span className="ml-2 px-2 py-0.5 bg-zinc-800 rounded text-xs font-bold text-zinc-500">
+                  {results.length} Rows
+                </span>
               </div>
-              <button onClick={handleDownloadCSV} disabled={results.length === 0} className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white text-sm font-bold rounded-xl">
+              <button
+                onClick={handleDownloadCSV}
+                disabled={results.length === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white text-sm font-bold rounded-xl"
+              >
                 <FileSpreadsheet size={16} /> Export CSV
               </button>
             </div>
@@ -241,20 +310,31 @@ export default function RawQueries() {
                   <tr className="bg-zinc-900/80">
                     {columns.length > 0 ? (
                       columns.map((col) => (
-                        <th key={col} className="px-8 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50 whitespace-nowrap">
+                        <th
+                          key={col}
+                          className="px-8 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50 whitespace-nowrap"
+                        >
                           {col}
                         </th>
                       ))
                     ) : (
-                      <th className="px-8 py-12 text-center text-zinc-600 font-medium italic">Execute a query to see results here</th>
+                      <th className="px-8 py-12 text-center text-zinc-600 font-medium italic">
+                        Execute a query to see results here
+                      </th>
                     )}
                   </tr>
                 </thead>
                 <tbody>
                   {results.map((row, i) => (
-                    <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
+                    <tr
+                      key={i}
+                      className="hover:bg-zinc-800/30 transition-colors"
+                    >
                       {columns.map((col, j) => (
-                        <td key={j} className="px-8 py-4 text-sm text-zinc-300 font-medium border-b border-zinc-800/50 whitespace-nowrap">
+                        <td
+                          key={j}
+                          className="px-8 py-4 text-sm text-zinc-300 font-medium border-b border-zinc-800/50 whitespace-nowrap"
+                        >
                           {row[col] === null ? (
                             <span className="text-zinc-600 italic">null</span>
                           ) : typeof row[col] === "object" ? (
