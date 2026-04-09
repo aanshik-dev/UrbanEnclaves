@@ -45,7 +45,6 @@ API.interceptors.response.use(
           refreshToken: refreshToken // Key must match your RefreshTokenRequestDTO
         });
 
-        // Backend returns: { data: { jwt: "...", refresh: "..." } }
         const { jwt, refresh } = res.data.data;
 
         localStorage.setItem("token", jwt);

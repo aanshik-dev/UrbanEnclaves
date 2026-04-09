@@ -167,39 +167,6 @@ export default function RawQueries() {
     }
   };
 
-  // const handleExecute = async () => {
-  //   if (!query.trim()) return;
-
-  //   setIsExecuting(true);
-  //   setError(null);
-  //   setResults([]);
-  //   setColumns([]);
-
-  //   try {
-  //     // Backend structured as { data: { columns: [], data: [] } }
-  //     // Using API.get with 'params' or 'data' depending on your backend config
-  //     const response = await API.get("/admin/query", {
-  //       data: { query: query },
-  //     });
-
-  //     const serverPayload = response.data.data; // This is the inner "data" object
-
-  //     if (serverPayload.success) {
-  //       setColumns(serverPayload.columns || []);
-  //       setResults(serverPayload.data || []);
-  //     } else {
-  //       setError(serverPayload.message || "Query failed to execute.");
-  //     }
-  //   } catch (err) {
-  //     console.error("SQL Execution Error:", err);
-  //     const errorMessage =
-  //       err.response?.data?.error?.message || "Failed to execute query.";
-  //     setError(errorMessage);
-  //   } finally {
-  //     setIsExecuting(false);
-  //   }
-  // };
-
   const handleDownloadCSV = () => {
     if (results.length === 0) return;
     const headers = columns.join(",");

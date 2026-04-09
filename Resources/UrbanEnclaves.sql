@@ -14,6 +14,7 @@ Select * from images;
 Select * from listing_token;
 
 select * from images i join property p on p.id = i.pid;
+select * from user u join user_profile p on u.id = p.user_id;
 
 -- 1  
 SELECT p.id pid,p.city,p.type,p.year_built,lt.id Listing_Token FROM property p
@@ -95,5 +96,22 @@ FROM property p
 JOIN listing_token lt ON p.id = lt.property_id
 WHERE lt.list_type = 'RENT'
   AND lt.price = (SELECT MAX(price) FROM listing_token WHERE list_type = 'RENT' AND status = 'ACTIVE');
+  
+  
+--   Highest rated agent for the year 2000, and total number of properties he has sold.
+
+
+select *
+from user_profile up
+join agent a on up.user_id = a.agent_id
+join performance p on p.agent_id = a.agent_id
+join transaction 
+where year(t.transaction_date) = 2023;
+
+
+
+
+  
+  
   
   
