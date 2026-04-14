@@ -202,12 +202,12 @@ export default function AgentPerformance() {
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-[11px] font-bold">
                       <span className="text-zinc-400">Activity Score</span>
-                      <span className="text-white">{selectedAgent.score * 10}%</span>
+                      <span className="text-white">{selectedAgent.score}%</span>
                     </div>
                     <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
-                        animate={{ width: `${selectedAgent.score * 10}%` }}
+                        animate={{ width: `${selectedAgent.score}%` }}
                         className="h-full bg-orange-500"
                       />
                     </div>
