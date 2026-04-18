@@ -18,13 +18,15 @@ export default function TransactionsRecord() {
   const [filterStatus, setFilterStatus] = useState("All");
   const [loading, setLoading] = useState(true);
 
-  // --- FETCH DATA FROM BACKEND ---
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         const response = await API.get("/api/transactions/me/transactions");
-        // Accessing response.data.data based on your JSON structure
-        setTransactionData(response.data.data || []);
+        const sortedData = (response.data.data || []).sort(
+          (a, b) => a.transactionId - b.transactionId,
+        );
+        console.log("Sorted Data:", sortedData);
+        setTransactionData(sortedData);
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
       } finally {
@@ -40,8 +42,9 @@ export default function TransactionsRecord() {
       t.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.agentName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.buyerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.sellerName?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+      t.sellerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.transactionId?.toString().includes(searchQuery);
+
     // Note: Adjusting filter logic as backend currently doesn't have a 'status' field
     const matchesStatus = filterStatus === "All" || t.mode === filterStatus;
     return matchesSearch && matchesStatus;
@@ -49,16 +52,23 @@ export default function TransactionsRecord() {
 
   const getStatusColor = (status) => {
     // Defaulting logic since status isn't in backend yet
-    if (status === "ONLINE" || status === "BANK_TRANSFER") return "text-emerald-500 bg-emerald-500/10";
+    if (status === "ONLINE" || status === "BANK_TRANSFER")
+      return "text-emerald-500 bg-emerald-500/10";
     return "text-blue-500 bg-blue-500/10";
   };
 
   const getStatusIcon = (status) => {
-    if (status === "ONLINE" || status === "BANK_TRANSFER") return <CheckCircle2 size={12} />;
+    if (status === "ONLINE" || status === "BANK_TRANSFER")
+      return <CheckCircle2 size={12} />;
     return <Clock size={12} />;
   };
 
-  if (loading) return <div className="p-10 text-zinc-500 animate-pulse">Loading Transaction Records...</div>;
+  if (loading)
+    return (
+      <div className="p-10 text-zinc-500 animate-pulse">
+        Loading Transaction Records...
+      </div>
+    );
 
   return (
     <div className="space-y-6">
@@ -99,18 +109,35 @@ export default function TransactionsRecord() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-zinc-900/80">
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">ID</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Property/City</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Agent</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Parties</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Amount</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Mode</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50 text-right">Action</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                  ID
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                  Property/City
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                  Agent
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                  Parties
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                  Amount
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                  Mode
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50 text-right">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredTransactions.map((t) => (
-                <tr key={t.transactionId} className="hover:bg-zinc-800/30 transition-colors group">
+                <tr
+                  key={t.transactionId}
+                  className="hover:bg-zinc-800/30 transition-colors group"
+                >
                   <td className="px-6 py-4 text-xs text-zinc-400 font-mono border-b border-zinc-800/50">
                     TR-{t.transactionId}
                   </td>
@@ -132,29 +159,39 @@ export default function TransactionsRecord() {
                       <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
                         {t.agentName?.substring(0, 2).toUpperCase()}
                       </div>
-                      <span className="text-zinc-300 font-medium text-xs">{t.agentName}</span>
+                      <span className="text-zinc-300 font-medium text-xs">
+                        {t.agentName}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 border-b border-zinc-800/50">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <User size={10} className="text-emerald-500" />
-                        <span className="text-zinc-300 text-[10px]">B: {t.buyerName}</span>
+                        <span className="text-zinc-300 text-[10px]">
+                          B: {t.buyerName}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <User size={10} className="text-zinc-500" />
-                        <span className="text-zinc-400 text-[10px]">S: {t.sellerName}</span>
+                        <span className="text-zinc-400 text-[10px]">
+                          S: {t.sellerName}
+                        </span>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 border-b border-zinc-800/50">
-                    <p className="text-white font-bold text-xs">₹{t.amount.toLocaleString()}</p>
+                    <p className="text-white font-bold text-xs">
+                      ₹{t.amount.toLocaleString()}
+                    </p>
                     <p className="text-zinc-500 text-[8px] font-bold uppercase tracking-widest">
                       List: ₹{t.listingPrice.toLocaleString()}
                     </p>
                   </td>
                   <td className="px-6 py-4 border-b border-zinc-800/50">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest ${getStatusColor(t.mode)}`}>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest ${getStatusColor(t.mode)}`}
+                    >
                       {getStatusIcon(t.mode)}
                       {t.mode.replace("_", " ")}
                     </span>
@@ -171,7 +208,9 @@ export default function TransactionsRecord() {
           {filteredTransactions.length === 0 && (
             <div className="text-center py-12">
               <History className="mx-auto text-zinc-800 mb-2" size={32} />
-              <p className="text-zinc-500 font-medium text-sm">No transactions found.</p>
+              <p className="text-zinc-500 font-medium text-sm">
+                No transactions found.
+              </p>
             </div>
           )}
         </div>

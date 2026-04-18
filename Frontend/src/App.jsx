@@ -24,6 +24,7 @@ import Settings from "./components/dashboard/Settings";
 import AgentListings from "./components/dashboard/AgentListings";
 import Holdings from "./components/dashboard/Holdings";
 import About from "./components/dashboard/About";
+import OfficeHome from "./components/dashboard/OfficeHome";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -57,6 +58,24 @@ function App() {
               element={<Notifications role="ADMIN" />}
             />
             <Route path="profile" element={<Profile role="ADMIN" />} />
+            <Route path="about" element={<About />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Route>
+
+        {/* Admin Dashboard Routes */}
+        <Route element={<ProtectedRoute allowedRole="OFFICE" />}>
+          <Route path="/office" element={<DashboardLayout role="OFFICE" />}>
+            <Route index element={<Navigate to="/office/home" replace />} />
+            <Route path="home" element={<OfficeHome />} />
+            <Route path="track" element={<TrackProperties />} />
+            <Route path="agents" element={<AgentPerformance />} />
+            <Route path="transactions" element={<TransactionsRecord />} />
+            <Route
+              path="notifications"
+              element={<Notifications role="OFFICE" />}
+            />
+            <Route path="profile" element={<Profile role="OFFICE" />} />
             <Route path="about" element={<About />} />
             <Route path="settings" element={<Settings />} />
           </Route>

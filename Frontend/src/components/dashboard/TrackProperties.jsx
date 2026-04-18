@@ -43,20 +43,24 @@ export default function TrackProperties() {
     const fetchPropertyData = async () => {
       try {
         const response = await API.get("/api/properties/me/properties");
-        
-        // Map data and assign fallback images if API array is empty
-        const processedData = response.data.data.map(p => ({
-          ...p,
-          images: (p.images && p.images.length > 0) ? p.images : getRandomImages()
-        }));
 
+        const processedData = response.data.data.map((p) => ({
+          ...p,
+          images:
+            p.images && p.images.length > 0 ? p.images : getRandomImages(),
+        }));
+        
+        console.log("Property Data:", response.data.data);
         setPropertyData(processedData);
 
         if (processedData.length > 0) {
           setSelectedProperty(processedData[0]);
         }
       } catch (error) {
-        console.error("Error fetching property data:", error.response?.data || error.message);
+        console.error(
+          "Error fetching property data:",
+          error.response?.data || error.message,
+        );
       } finally {
         setLoading(false);
       }
@@ -67,12 +71,13 @@ export default function TrackProperties() {
 
   const query = searchQuery.trim().toLowerCase();
 
-  const filteredProperties = propertyData.filter((p) =>
-    (p.locality || "").toLowerCase().includes(query) ||
-    (p.city || "").toLowerCase().includes(query) ||
-    (p.area || "").toLowerCase().includes(query) ||
-    String(p.pin || "").includes(query) ||
-    (p.type || "").toLowerCase().includes(query)
+  const filteredProperties = propertyData.filter(
+    (p) =>
+      (p.locality || "").toLowerCase().includes(query) ||
+      (p.city || "").toLowerCase().includes(query) ||
+      (p.area || "").toLowerCase().includes(query) ||
+      String(p.pin || "").includes(query) ||
+      (p.type || "").toLowerCase().includes(query),
   );
 
   if (loading) {
@@ -96,12 +101,19 @@ export default function TrackProperties() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col gap-0.5">
-          <h1 className="text-2xl font-bold text-white tracking-tight">Track Properties</h1>
-          <p className="text-zinc-400 text-sm font-medium">Monitor your personal listings and handler offices.</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Track Properties
+          </h1>
+          <p className="text-zinc-400 text-sm font-medium">
+            Monitor your personal listings and handler offices.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative group w-48">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors" size={14} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors"
+              size={14}
+            />
             <input
               type="text"
               placeholder="Search..."
@@ -140,14 +152,18 @@ export default function TrackProperties() {
                     <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">
                       #{property.id}
                     </span>
-                    <span className="text-orange-500 font-bold text-xs uppercase">{property.type}</span>
+                    <span className="text-orange-500 font-bold text-xs uppercase">
+                      {property.type}
+                    </span>
                   </div>
                   <h3 className="text-white font-bold truncate text-sm mb-0.5">
                     {property.BHK} BHK • {property.locality}
                   </h3>
                   <div className="flex items-center gap-1 text-zinc-500 text-[10px] mb-1.5">
                     <MapPin size={10} />
-                    <span className="truncate">{property.city}, {property.area}</span>
+                    <span className="truncate">
+                      {property.area}, {property.city}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -158,7 +174,9 @@ export default function TrackProperties() {
                         {property.owner?.name}
                       </span>
                     </div>
-                    <span className="text-zinc-600 text-[9px] font-bold">{property.year_built}</span>
+                    <span className="text-zinc-600 text-[9px] font-bold">
+                      {property.year_built}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -170,7 +188,10 @@ export default function TrackProperties() {
         {selectedProperty && (
           <div className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-y-auto scrollbar-hide flex flex-col backdrop-blur-sm">
             <div className="h-[400px] min-h-[400px] relative group">
-              <PropertyCarousel images={selectedProperty.images} title={selectedProperty.houseNo} />
+              <PropertyCarousel
+                images={selectedProperty.images}
+                title={selectedProperty.houseNo}
+              />
               <div className="absolute bottom-6 left-8 pointer-events-none">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg uppercase">
@@ -185,63 +206,179 @@ export default function TrackProperties() {
                 </h2>
               </div>
               <div className="absolute bottom-6 right-8 pointer-events-none text-right">
-                <p className="text-2xl font-bold text-orange-500">#{selectedProperty.id}</p>
-                <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest">Property ID</p>
+                <p className="text-2xl font-bold text-orange-500">
+                  #{selectedProperty.id}
+                </p>
+                <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest">
+                  Property ID
+                </p>
               </div>
             </div>
 
             <div className="p-6">
               {/* Quick Info Grid */}
-              <div className="grid grid-cols-3 gap-3 mb-8">
+              <div className="grid grid-cols-4 gap-3 mb-6">
                 <div className="bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-center">
-                  <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">BHK</p>
-                  <p className="text-white font-bold text-sm">{selectedProperty.BHK}</p>
+                  <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                    BHK
+                  </p>
+                  <p className="text-white font-bold text-sm">
+                    {selectedProperty.BHK}
+                  </p>
                 </div>
                 <div className="bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-center">
-                  <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">Area Size</p>
-                  <p className="text-white font-bold text-sm">{selectedProperty.size} sq.ft</p>
+                  <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                    Type
+                  </p>
+                  <p className="text-white font-bold text-sm">
+                    {selectedProperty.type}
+                  </p>
                 </div>
                 <div className="bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-center">
-                  <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">Year Built</p>
-                  <p className="text-white font-bold text-sm">{selectedProperty.year_built}</p>
+                  <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                    Area Size
+                  </p>
+                  <p className="text-white font-bold text-sm">
+                    {selectedProperty.size} sq.ft
+                  </p>
+                </div>
+                <div className="bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-center">
+                  <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                    Year Built
+                  </p>
+                  <p className="text-white font-bold text-sm">
+                    {selectedProperty.year_built}
+                  </p>
                 </div>
               </div>
 
+              {/* Full Address */}
+              <div className="mb-8">
+                <h4 className="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <MapPin className="text-orange-500" size={16} /> Location
+                  Details
+                </h4>
+                <div className="bg-zinc-800/20 rounded-2xl border border-zinc-800/50 overflow-hidden">
+                  <div className="grid grid-cols-2 sm:grid-cols-3">
+                    {/* Flat / House No */}
+                    <div className="p-4 border-b border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Flat / House No
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.houseNo}
+                      </p>
+                    </div>
+
+                    {/* Locality */}
+                    <div className="p-4 border-b border-r sm:border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Locality
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.locality}
+                      </p>
+                    </div>
+
+                    {/* Area */}
+                    <div className="p-4 border-b border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Area
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.area}
+                      </p>
+                    </div>
+
+                    {/* City */}
+                    <div className="p-4 border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        City
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.city}
+                      </p>
+                    </div>
+
+                    {/* Pincode */}
+                    <div className="p-4 border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Pincode
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.pin}
+                      </p>
+                    </div>
+
+                    {/* State / Region (Optional Placeholder or filler) */}
+                    <div className="p-4 border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Country
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        INDIA
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description - MOVED UP */}
+              <div className="mb-8">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <Info className="text-orange-500" size={16} /> Description
+                </h4>
+                <p className="text-zinc-400 text-sm leading-relaxed font-medium bg-zinc-800/20 p-4 rounded-xl border border-zinc-800/50">
+                  Premium {selectedProperty.BHK} BHK {selectedProperty.type}{" "}
+                  located in the prime area of {selectedProperty.locality}. The
+                  property features a spacious {selectedProperty.size} sq.ft
+                  layout with modern amenities handled by the{" "}
+                  {selectedProperty.office?.officeName}.
+                </p>
+              </div>
+
+              {/* Two Column Layout for Office and Owner */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Office Info */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
-                    <Activity className="text-orange-500" size={16} /> Handling Office
+                    <Activity className="text-orange-500" size={16} /> Handling
+                    Office
                   </h4>
                   <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-400 text-xs font-medium">Office Name</span>
-                      <span className="text-white font-bold text-xs">{selectedProperty.office?.officeName}</span>
+                      <span className="text-zinc-400 text-xs font-medium">
+                        Office Name
+                      </span>
+                      <span className="text-white font-bold text-xs">
+                        {selectedProperty.office?.officeName}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-400 text-xs font-medium">Contact</span>
-                      <span className="text-white font-bold text-xs">+91 {selectedProperty.office?.officeContact}</span>
+                      <span className="text-zinc-400 text-xs font-medium">
+                        Location
+                      </span>
+                      <span className="text-white font-bold text-xs">
+                        {selectedProperty.office?.OfficeLocation ||
+                          selectedProperty.city}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-400 text-xs font-medium">Pin Code</span>
-                      <span className="text-white font-bold text-xs">{selectedProperty.pin}</span>
+                      <span className="text-zinc-400 text-xs font-medium">
+                        Contact
+                      </span>
+                      <span className="text-white font-bold text-xs">
+                        +91 {selectedProperty.office?.officeContact}
+                      </span>
                     </div>
-                  </div>
-                  <div className="mx-2">
-                    <h4 className="text-white font-bold mb-2 flex items-center gap-2 text-sm">
-                      <Info className="text-orange-500" size={16} /> Description
-                    </h4>
-                    <p className="text-zinc-500 text-xs leading-relaxed font-medium">
-                      Premium {selectedProperty.BHK} BHK {selectedProperty.type} located in the prime area of {selectedProperty.locality}. 
-                      The property features a spacious {selectedProperty.size} sq.ft layout with modern amenities handled by the {selectedProperty.office?.officeName}.
-                    </p>
                   </div>
                 </div>
 
                 {/* Owner Info */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
-                    <Briefcase className="text-orange-500" size={16} /> Owner details
+                    <Briefcase className="text-orange-500" size={16} /> Owner
+                    details
                   </h4>
                   <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
                     <div className="flex items-center gap-3 mb-4">
@@ -249,8 +386,10 @@ export default function TrackProperties() {
                         {selectedProperty.owner?.name?.substring(0, 2)}
                       </div>
                       <div>
-                        <h5 className="text-white font-bold text-sm">{selectedProperty.owner?.name}</h5>
-                        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+                        <h5 className="text-white font-bold text-sm">
+                          {selectedProperty.owner?.name}
+                        </h5>
+                        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-2">
                           Contact: {selectedProperty.owner?.phone}
                         </p>
                       </div>

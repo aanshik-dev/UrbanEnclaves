@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -21,9 +21,23 @@ import API from "../api/axios";
 const Login = () => {
   const [role, setRole] = useState("USER");
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("admin@urban.enc");
+  // const [email, setEmail] = useState("admin@urban.enc");
+  // const [email, setEmail] = useState("office.delhi@urban.enc");
+  const [email, setEmail] = useState("kiran.saxena@example.com");
   const [password, setPassword] = useState("password123");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (role === "ADMIN") {
+      setEmail("admin@urban.enc");
+    } else if (role === "OFFICE") {
+      setEmail("office.delhi@urban.enc");
+    } else if (role === "AGENT") {
+      setEmail("kiran.saxena@example.com");
+    } else {
+      setEmail("aditya.sharma@example.com");
+    }
+  }, [role]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

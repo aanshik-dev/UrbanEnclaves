@@ -37,6 +37,17 @@ const Sidebar = ({ role, isCollapsed, setIsCollapsed }) => {
     { title: "Settings", path: "/admin/settings", icon: Settings },
   ];
 
+  const officeItems = [
+    { title: "Dashboard", path: "/office/home", icon: LayoutDashboard },
+    { title: "Track Properties", path: "/office/track", icon: Map },
+    { title: "Agent Performance", path: "/office/agents", icon: TrendingUp },
+    { title: "Transactions", path: "/office/transactions", icon: History },
+    { title: "Notifications", path: "/office/notifications", icon: Bell },
+    { title: "Profile", path: "/office/profile", icon: User },
+    { title: "About", path: "/office/about", icon: Info },
+    { title: "Settings", path: "/office/settings", icon: Settings },
+  ];
+
   const agentItems = [
     { title: "Dashboard", path: "/agent/home", icon: LayoutDashboard },
     { title: "Listings", path: "/agent/listings", icon: Home },
@@ -57,7 +68,7 @@ const Sidebar = ({ role, isCollapsed, setIsCollapsed }) => {
   ];
 
   const items =
-    role === "ADMIN" ? adminItems : role === "AGENT" ? agentItems : userItems;
+    role === "ADMIN" ? adminItems : role === "AGENT" ? agentItems : role === "OFFICE" ? officeItems : userItems;
 
   return (
     <motion.div

@@ -59,9 +59,10 @@ const StatCard = ({ title, value, icon: Icon, trend, trendValue }) => (
   </motion.div>
 );
 
-export default function AdminHome() {
+export default function OfficeHome() {
   const [dashboardData, setDashboardData] = useState(null);
   const [graphData, setGraphData] = useState(null);
+  const [transactions, setTransactions] = useState(null);
   const [topAgentData, setTopAgentData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [graphLoading, setGraphLoading] = useState(true);
@@ -71,7 +72,7 @@ export default function AdminHome() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await API.get("/admin/dashboard");
+        const response = await API.get("/api/offices/me/dashboard");
         setDashboardData(response.data.data);
         console.log("Dashboard Data:", response.data.data);
       } catch (error) {
@@ -84,25 +85,28 @@ export default function AdminHome() {
   }, []);
 
   useEffect(() => {
-    const fetchGraph = async () => {
-      setGraphLoading(true);
+    const fetchTransactions = async () => {
       try {
-        const response = await API.get(`/analytics/revenue?type=${filterType}`);
-        setGraphData(response.data.data);
-        console.log("Graph Data:", response.data.data);
+        const response = await API.get("/api/transactions/me/transactions");
+        const rawData = response.data.data || [];
+        const sortedTrans = [...rawData].sort(
+          (a, b) => new Date(b.date) - new Date(a.date),
+        );
+        setTransactions(sortedTrans.slice(0, 5));
+        console.log("Transaction Data:", sortedTrans);
       } catch (error) {
-        console.error("Graph Data Error:", error);
+        console.error("Transaction Error:", error);
       } finally {
-        setGraphLoading(false);
+        setLoading(false);
       }
     };
-    fetchGraph();
-  }, [filterType]);
+    fetchTransactions();
+  }, []);
 
   useEffect(() => {
     const fetchTopAgent = async () => {
       try {
-        const response = await API.get("/admin/analytics/top-agents");
+        const response = await API.get("/api/offices/analytics/top-agents");
         setTopAgentData(response.data.data);
         console.log("Top Agent Data:", response.data.data);
       } catch (error) {
@@ -114,12 +118,29 @@ export default function AdminHome() {
     fetchTopAgent();
   }, []);
 
+  useEffect(() => {
+    const fetchGraph = async () => {
+      setGraphLoading(true);
+      try {
+        const response = await API.get(`/analytics/revenue?type=${filterType}`);
+        console.log("Graph Data:", response.data.data);
+        setGraphData(response.data.data);
+      } catch (error) {
+        console.error("Graph Data Error:", error);
+      } finally {
+        setGraphLoading(false);
+      }
+    };
+    fetchGraph();
+  }, [filterType]);
+
   if (loading)
     return (
       <div className="h-96 flex items-center justify-center text-zinc-500 animate-pulse">
         Loading...
       </div>
     );
+  if (!dashboardData) return null;
 
   if (!dashboardData) {
     return (
@@ -172,14 +193,14 @@ export default function AdminHome() {
         />
         <StatCard
           title="Active Agents"
-          value={dashboardData.totalAgents}
+          value={dashboardData.activeAgents}
           icon={Users}
           trend="down"
           trendValue={2.1}
         />
         <StatCard
-          title="Total Users"
-          value={dashboardData.totalUsers}
+          title="Active Listings"
+          value={dashboardData.activeListings}
           icon={TrendingUp}
           trend="up"
           trendValue={15.3}
@@ -267,7 +288,7 @@ export default function AdminHome() {
         {/* Best Performing Agent */}
         <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-[1.5rem] backdrop-blur-sm flex flex-col">
           <h3 className="text-lg font-bold text-white mb-6">Top Agent</h3>
-          {topAgent ? (
+          {topAgent && !topAgentLoading ? (
             <div className="flex flex-col items-center text-center flex-1 justify-center">
               <div className="relative mb-4">
                 <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-2xl font-bold shadow-2xl shadow-orange-500/40">
@@ -335,7 +356,7 @@ export default function AdminHome() {
             </button>
           </div>
           <div className="space-y-3">
-            {dashboardData.recentTransactions?.map((tx) => (
+            {transactions?.map((tx) => (
               <div
                 key={tx.transactionId}
                 className="flex items-center justify-between p-3 bg-zinc-800/30 rounded-xl border border-zinc-800/50 hover:border-orange-500/30 transition-all group"
@@ -346,7 +367,7 @@ export default function AdminHome() {
                   </div>
                   <div>
                     <p className="text-white font-bold text-sm">
-                      {tx.propertyCity} - {tx.buyerName} To {tx.sellerName}
+                      {tx.city} - {tx.buyerName} To {tx.sellerName}
                     </p>
                     <p className="text-zinc-500 text-[10px] font-medium">
                       {tx.mode} • {tx.date} #{tx.transactionId}
