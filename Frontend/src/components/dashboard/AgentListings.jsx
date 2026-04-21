@@ -15,6 +15,7 @@ import {
   UserPlus,
   Calendar,
   Activity,
+  Building,
 } from "lucide-react";
 import PropertyCarousel from "./PropertyCarousel";
 import FilterPanel from "./FilterPanel";
@@ -55,30 +56,80 @@ export default function AgentListings() {
   const [searchQuery, setSearchQuery] = useState("");
   const [requestSent, setRequestSent] = useState(false);
   const [activeFilters, setActiveFilters] = useState(BLANK_FILTERS);
+  const [notification, setNotification] = useState(null);
   const filterBtnRef = useRef(null);
 
-  useEffect(() => {
-    const fetchPropertyData = async () => {
-      try {
-        const response = await API.get("/api/agents/listings/available");
-        const processedData = response.data.data.map((p) => ({
-          ...p,
-          images:
-            p.images && p.images.length > 0 ? p.images : getRandomImages(),
-        }));
-        setPropertyData(processedData);
-        if (processedData.length > 0) setSelectedProperty(processedData[0]);
-      } catch (error) {
-        console.error(
-          "Error fetching property data:",
-          error.response?.data || error.message,
-        );
-      } finally {
-        setLoading(false);
+  const fetchPropertyData = async () => {
+    try {
+      const response = await API.get("/api/agents/listings/available");
+      const processedData = response.data.data.map((p) => ({
+        ...p,
+        images: p.images && p.images.length > 0 ? p.images : getRandomImages(),
+      }));
+      setPropertyData(processedData);
+      console.log("Property Data:", processedData);
+      if (
+        processedData.length > 0 &&
+        (!selectedProperty ||
+          !processedData.find((p) => p.tokenId === selectedProperty.tokenId))
+      ) {
+        setSelectedProperty(processedData[0]);
+      } else if (processedData.length === 0) {
+        setSelectedProperty(null);
       }
-    };
+    } catch (error) {
+      console.error(
+        "Error fetching property data:",
+        error.response?.data || error.message,
+      );
+      showNotification("Failed to fetch listings", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPropertyData();
   }, []);
+
+  const showNotification = (message, type = "success") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleBecomeAgent = async () => {
+    if (!selectedProperty) return;
+
+    setRequestSent(true);
+    try {
+      const response = await API.put(
+        `/api/listings/${selectedProperty.tokenId}/accept`,
+      );
+
+      if (response.data.success || response.status === 200) {
+        showNotification(
+          `Successfully accepted listing ${selectedProperty.tokenId}!`,
+          "success",
+        );
+        // Refresh the listings
+        await fetchPropertyData();
+      } else {
+        showNotification(
+          response.data.message || "Failed to accept listing",
+          "error",
+        );
+      }
+    } catch (error) {
+      console.error("Error accepting listing:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to accept listing";
+      showNotification(errorMessage, "error");
+    } finally {
+      setRequestSent(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -173,13 +224,31 @@ export default function AgentListings() {
     setShowFilters(false);
   };
 
-  const handleBecomeAgent = () => {
-    setRequestSent(true);
-    setTimeout(() => setRequestSent(false), 3000);
-  };
-
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] relative">
+      {/* Notification Toast */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 ${
+              notification.type === "success"
+                ? "bg-emerald-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {notification.type === "success" ? (
+              <CheckCircle2 size={18} />
+            ) : (
+              <Info size={18} />
+            )}
+            <span className="text-sm font-medium">{notification.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex-1 flex gap-6 min-h-0">
         {/* Left Sidebar */}
         <div className="w-[380px] flex flex-col gap-3 min-h-0">
@@ -347,7 +416,7 @@ export default function AgentListings() {
                 </div>
                 <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
                   <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
-                    <Bath size={16} />
+                    <Building size={16} />
                   </div>
                   <div>
                     <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
@@ -498,21 +567,42 @@ export default function AgentListings() {
                 </div>
 
                 {/* Owner Info */}
+                {/* Owner Info Section - Updated with Profile Image */}
                 <div className="space-y-4">
                   <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
                     <User className="text-orange-500" size={16} /> Owner details
                   </h4>
                   <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20 uppercase">
-                        {selectedProperty.owner.name.substring(0, 2)}
+                      {/* Avatar with Profile Image Support */}
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20 overflow-hidden">
+                        {selectedProperty.owner?.profileUrl ? (
+                          <img
+                            src={selectedProperty.owner.profileUrl}
+                            alt={selectedProperty.owner.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to initials if image fails to load
+                              e.target.style.display = "none";
+                              e.target.parentElement.innerHTML =
+                                selectedProperty.owner.name
+                                  .substring(0, 2)
+                                  .toUpperCase();
+                            }}
+                          />
+                        ) : (
+                          <span className="uppercase">
+                            {selectedProperty.owner.name.substring(0, 2)}
+                          </span>
+                        )}
                       </div>
                       <div>
                         <h5 className="text-white font-bold text-sm">
                           {selectedProperty.owner.name}
                         </h5>
-                        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-2">
-                          Contact: {selectedProperty.owner?.phone}
+                        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">
+                          Contact:{" "}
+                          {selectedProperty.owner?.phone || "Not provided"}
                         </p>
                       </div>
                     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import API from "../../api/axios";
 import {
   Building2,
@@ -12,6 +12,10 @@ import {
   AlertCircle,
   Hash,
   Home,
+  CreditCard,
+  X,
+  Banknote,
+  Wallet,
 } from "lucide-react";
 
 // Pool of high-quality fallback images
@@ -96,24 +100,130 @@ export default function Holdings() {
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyData, setPropertyData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [leavingTokenId, setLeavingTokenId] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [paymentDetails, setPaymentDetails] = useState({
+    amount: "",
+    type: "FULL",
+    mode: "ONLINE",
+    buyerId: "",
+  });
+  const [processingPayment, setProcessingPayment] = useState(false);
+
+  const showNotification = (message, type = "success") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const fetchPropertyData = async () => {
+    try {
+      const response = await API.get("/api/listings/me/listings");
+      console.log("Property Data:", response.data.data);
+      setPropertyData(response.data.data);
+    } catch (error) {
+      console.error(
+        "Error fetching property data:",
+        error.response?.data || error.message,
+      );
+      showNotification("Failed to fetch holdings", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPropertyData = async () => {
-      try {
-        const response = await API.get("/api/listings/me/listings");
-        console.log("Property Data:", response.data.data);
-        setPropertyData(response.data.data);
-      } catch (error) {
-        console.error(
-          "Error fetching property data:",
-          error.response?.data || error.message,
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPropertyData();
   }, []);
+
+  const handleLeaveProperty = async (tokenId) => {
+    setLeavingTokenId(tokenId);
+    try {
+      const response = await API.patch(`/api/listings/${tokenId}/leave`);
+
+      if (response.data.success || response.status === 200) {
+        showNotification(`Successfully left property ${tokenId}`, "success");
+        await fetchPropertyData();
+      } else {
+        showNotification(
+          response.data.message || "Failed to leave property",
+          "error",
+        );
+      }
+    } catch (error) {
+      console.error("Error leaving property:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to leave property";
+      showNotification(errorMessage, "error");
+    } finally {
+      setLeavingTokenId(null);
+    }
+  };
+
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    if (!selectedProperty) return;
+
+    setProcessingPayment(true);
+    try {
+      const transactionData = {
+        amount: parseFloat(paymentDetails.amount),
+        type: paymentDetails.type,
+        mode: paymentDetails.mode,
+        agentId: selectedProperty.agent?.agentId,
+        buyerId: parseInt(paymentDetails.buyerId),
+        tokenId: selectedProperty.tokenId,
+      };
+
+      console.log("Transaction Data:", transactionData);
+      const response = await API.post("/api/transactions", transactionData);
+
+      if (
+        response.data.success ||
+        response.status === 200 ||
+        response.status === 201
+      ) {
+        showNotification(
+          `Payment of ₹${paymentDetails.amount} processed successfully!`,
+          "success",
+        );
+        setShowPaymentModal(false);
+        setPaymentDetails({
+          amount: "",
+          type: "FULL",
+          mode: "ONLINE",
+          buyerId: "",
+        });
+        await fetchPropertyData();
+      } else {
+        showNotification(response.data.message || "Payment failed", "error");
+      }
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to process payment";
+      showNotification(errorMessage, "error");
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
+  const openPaymentModal = (property) => {
+    setSelectedProperty(property);
+    // Pre-fill amount with property price
+    setPaymentDetails({
+      amount: property.price.toString(),
+      type: "FULL",
+      mode: "ONLINE",
+      buyerId: "",
+    });
+    setShowPaymentModal(true);
+  };
 
   if (loading) {
     return (
@@ -133,9 +243,6 @@ export default function Holdings() {
           <Building2 className="mx-auto text-zinc-800 mb-3" size={48} />
           <p className="text-zinc-500 font-medium">
             No Property Data Available
-          </p>
-          <p className="text-zinc-600 text-sm mt-1">
-            You don't have any holdings yet.
           </p>
         </div>
       </div>
@@ -161,6 +268,237 @@ export default function Holdings() {
 
   return (
     <div className="space-y-6">
+      {/* Notification Toast */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 ${
+              notification.type === "success"
+                ? "bg-emerald-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {notification.type === "success" ? (
+              <CheckCircle2 size={18} />
+            ) : (
+              <AlertCircle size={18} />
+            )}
+            <span className="text-sm font-medium">{notification.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Payment Modal */}
+      <AnimatePresence>
+        {showPaymentModal && selectedProperty && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowPaymentModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-500/10 rounded-xl">
+                    <CreditCard className="text-orange-500" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-lg">
+                      Make Payment
+                    </h3>
+                    <p className="text-zinc-500 text-xs">
+                      Token #{selectedProperty.tokenId}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowPaymentModal(false)}
+                  className="p-1 hover:bg-zinc-800 rounded-lg transition-colors"
+                >
+                  <X size={18} className="text-zinc-500" />
+                </button>
+              </div>
+
+              <form onSubmit={handlePayment} className="space-y-4">
+                {/* Amount Field */}
+                <div>
+                  <label className="block text-zinc-400 text-xs font-bold uppercase tracking-widest mb-2">
+                    Amount (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={paymentDetails.amount}
+                    onChange={(e) =>
+                      setPaymentDetails({
+                        ...paymentDetails,
+                        amount: e.target.value,
+                      })
+                    }
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-orange-500/50 transition-all"
+                    placeholder="Enter amount"
+                    required
+                    step="1"
+                    min="1"
+                  />
+                  <p className="text-zinc-600 text-[10px] mt-1">
+                    Property price: ₹{selectedProperty.price.toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Transaction Type */}
+                <div>
+                  <label className="block text-zinc-400 text-xs font-bold uppercase tracking-widest mb-2">
+                    Transaction Type
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPaymentDetails({ ...paymentDetails, type: "FULL" })
+                      }
+                      className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                        paymentDetails.type === "FULL"
+                          ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                      }`}
+                    >
+                      FULL
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPaymentDetails({
+                          ...paymentDetails,
+                          type: "ADVANCE",
+                        })
+                      }
+                      className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                        paymentDetails.type === "ADVANCE"
+                          ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                      }`}
+                    >
+                      ADVANCE
+                    </button>
+                  </div>
+                </div>
+
+                {/* Payment Mode */}
+                <div>
+                  <label className="block text-zinc-400 text-xs font-bold uppercase tracking-widest mb-2">
+                    Payment Mode
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPaymentDetails({ ...paymentDetails, mode: "ONLINE" })
+                      }
+                      className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
+                        paymentDetails.mode === "ONLINE"
+                          ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                      }`}
+                    >
+                      <Wallet size={14} />
+                      ONLINE
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPaymentDetails({
+                          ...paymentDetails,
+                          mode: "BANK_TRANSFER",
+                        })
+                      }
+                      className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
+                        paymentDetails.mode === "BANK_TRANSFER"
+                          ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                      }`}
+                    >
+                      <Banknote size={14} />
+                      BANK
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPaymentDetails({ ...paymentDetails, mode: "CARD" })
+                      }
+                      className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
+                        paymentDetails.mode === "CARD"
+                          ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                      }`}
+                    >
+                      <CreditCard size={14} />
+                      CARD
+                    </button>
+                  </div>
+                </div>
+
+                {/* Buyer ID */}
+                <div>
+                  <label className="block text-zinc-400 text-xs font-bold uppercase tracking-widest mb-2">
+                    Buyer ID
+                  </label>
+                  <input
+                    type="number"
+                    value={paymentDetails.buyerId}
+                    onChange={(e) =>
+                      setPaymentDetails({
+                        ...paymentDetails,
+                        buyerId: e.target.value,
+                      })
+                    }
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-orange-500/50 transition-all"
+                    placeholder="Enter buyer ID"
+                    required
+                    step="1"
+                    min="1"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={processingPayment}
+                  className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                    processingPayment
+                      ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                      : "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20"
+                  }`}
+                >
+                  {processingPayment ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={16} />
+                      Pay ₹
+                      {parseFloat(paymentDetails.amount || 0).toLocaleString()}
+                    </>
+                  )}
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex flex-col gap-0.5">
         <h1 className="text-2xl font-bold text-white tracking-tight">
           Manage Holdings
@@ -224,9 +562,19 @@ export default function Holdings() {
                   alt={getPropertyTitle(property)}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
+                {/* Pay Now Button - appears on hover */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <button
+                    onClick={() => openPaymentModal(h)}
+                    className="px-3 py-2 text-xs bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all transform scale-90 group-hover:scale-100 flex items-center gap-2 shadow-lg"
+                  >
+                    <CreditCard size={16} />
+                    Pay Now
+                  </button>
+                </div>
                 <div className="absolute top-3 right-3">
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg ${
+                    className={`px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg ${
                       h.status === "INACTIVE"
                         ? "bg-rose-500 text-white"
                         : "bg-emerald-500 text-white"
@@ -237,7 +585,7 @@ export default function Holdings() {
                 </div>
                 <div className="absolute top-3 left-3">
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg ${
+                    className={`px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg ${
                       h.listingType === "RENT"
                         ? "bg-blue-500 text-white"
                         : "bg-purple-500 text-white"
@@ -332,12 +680,29 @@ export default function Holdings() {
 
                 <div className="mt-auto space-y-2">
                   {h.status === "ACTIVE" ? (
-                    <button className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-xs group/btn border border-red-500/20">
-                      <LogOut
-                        size={14}
-                        className="group-hover/btn:-translate-x-1 transition-transform"
-                      />{" "}
-                      Leave Property
+                    <button
+                      onClick={() => handleLeaveProperty(h.tokenId)}
+                      disabled={leavingTokenId === h.tokenId}
+                      className={`w-full py-2.5 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-xs group/btn border ${
+                        leavingTokenId === h.tokenId
+                          ? "bg-zinc-700/50 text-zinc-400 border-zinc-600 cursor-not-allowed"
+                          : "bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20"
+                      }`}
+                    >
+                      {leavingTokenId === h.tokenId ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+                          Leaving...
+                        </>
+                      ) : (
+                        <>
+                          <LogOut
+                            size={14}
+                            className="group-hover/btn:-translate-x-1 transition-transform"
+                          />{" "}
+                          Leave Property
+                        </>
+                      )}
                     </button>
                   ) : (
                     <div className="flex items-center gap-2 p-2.5 bg-zinc-800/50 rounded-xl border border-zinc-800/50 text-zinc-500 text-[10px] font-bold justify-center">

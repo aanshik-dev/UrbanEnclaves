@@ -17,26 +17,55 @@ import {
   ChevronRight,
   ChevronLeft,
   Smartphone,
+  AlertCircle,
 } from "lucide-react";
 import { Icon } from "@iconify/react";
+import API from "../api/axios";
 
 export default function Register() {
   const [step, setStep] = useState(1);
   const [isAgent, setIsAgent] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [generatedUsername, setGeneratedUsername] = useState("");
   const otpRefs = useRef([]);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    city: "",
-    area: "",
-    pincode: "",
-    password: "",
+    fullName: "Aanshik Singh",
+    email: "techansiksinghtomar@gmail.com",
+    phone: "8822630829",
+    city: "Gwalior",
+    area: "Adityapuram",
+    pincode: "474569",
+    password: "password123",
+    username: "",
   });
+
+  // Generate random profile URL
+  const generateProfileURL = () => {
+    const isMale = Math.random() < 0.5;
+    const randomNumber = Math.floor(Math.random() * 100);
+    const gender = isMale ? "men" : "women";
+    return `https://randomuser.me/api/portraits/${gender}/${randomNumber}.jpg`;
+  };
+
+  // Generate username when full name changes
+  useEffect(() => {
+    if (formData.fullName && formData.fullName.trim()) {
+      const nameParts = formData.fullName.trim().toLowerCase().split(" ");
+      const firstName = nameParts[0];
+      const lastName =
+        nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+      const baseUsername = lastName ? `${firstName}.${lastName}` : firstName;
+      const randomNum = Math.floor(Math.random() * 900) + 100;
+      const newUsername = `${baseUsername}${randomNum}`;
+      setGeneratedUsername(newUsername);
+      setFormData((prev) => ({ ...prev, username: newUsername }));
+    }
+  }, [formData.fullName]);
 
   // Timer logic for OTP resend
   useEffect(() => {
@@ -50,6 +79,7 @@ export default function Register() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setError(""); // Clear error when user makes any change
   };
 
   const handleOtpChange = (index, value) => {
@@ -57,9 +87,10 @@ export default function Register() {
     const newOtp = [...otp];
     newOtp[index] = value.substring(value.length - 1);
     setOtp(newOtp);
+    setError(""); // Clear error when user enters OTP
 
     // Move to next input
-    if (value && index < 3) {
+    if (value && index < 5) {
       otpRefs.current[index + 1].focus();
     }
   };
@@ -70,23 +101,163 @@ export default function Register() {
     }
   };
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
-  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+  const validateStep = () => {
+    if (step === 1) {
+      if (!formData.fullName || !formData.email || !formData.phone) {
+        setError("Please fill all fields");
+        return false;
+      }
+      if (!formData.email.includes("@")) {
+        setError("Please enter a valid email");
+        return false;
+      }
+      if (formData.phone.length < 10) {
+        setError("Please enter a valid phone number");
+        return false;
+      }
+    } else if (step === 2) {
+      if (
+        !formData.city ||
+        !formData.area ||
+        !formData.pincode ||
+        !formData.username
+      ) {
+        setError("Please fill all fields");
+        return false;
+      }
+      if (formData.pincode.length !== 6 || !/^\d+$/.test(formData.pincode)) {
+        setError("Please enter a valid 6-digit pincode");
+        return false;
+      }
+    } else if (step === 3) {
+      if (!formData.password) {
+        setError("Please enter a password");
+        return false;
+      }
+      if (formData.password.length < 6) {
+        setError("Password must be at least 6 characters");
+        return false;
+      }
+    }
+    return true;
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (step < 4) {
-      nextStep();
-    } else {
-      // Final submission logic
-      console.log("Verified Registration:", {
-        ...formData,
-        isAgent,
-        otp: otp.join(""),
+  const sendOtp = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      await API.post("/auth/send-otp", {
+        email: formData.email,
       });
-      navigate("/login");
+      nextStep();
+      setTimer(30);
+      // Reset OTP fields
+      setOtp(["", "", "", "", "", ""]);
+    } catch (err) {
+      console.error("OTP Error:", err);
+      const errorMessage =
+        err.response?.data?.error?.message ||
+        "Failed to send OTP. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleSignup = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      // Generate random profile URL
+      const profileURL = generateProfileURL();
+
+      // Step 1: Signup with OTP and userType
+      const signupResponse = await API.post("/auth/signup", {
+        username: formData.username,
+        password: formData.password,
+        email: formData.email,
+        otp: otp.join(""),
+        userType: isAgent ? "AGENT" : "USER",
+      });
+
+      console.log("Signup Response:", signupResponse.data);
+
+      // Step 2: Login after successful signup
+      const loginResponse = await API.post("/auth/login", {
+        username: formData.email,
+        password: formData.password,
+        userType: isAgent ? "AGENT" : "USER",
+      });
+
+      const { jwt, refresh, username, id } = loginResponse.data.data;
+
+      // Store auth tokens
+      localStorage.setItem("token", jwt);
+      localStorage.setItem("refreshToken", refresh);
+      localStorage.setItem("role", isAgent ? "AGENT" : "USER");
+      localStorage.setItem("username", username);
+      localStorage.setItem("id", id);
+
+      // Step 3: Update user profile with additional details including profileURL
+      await API.post("/api/users/me", {
+        name: formData.fullName,
+        phone: parseInt(formData.phone.replace(/\D/g, "")),
+        profileURL: profileURL,
+        area: formData.area,
+        city: formData.city,
+        pin: parseInt(formData.pincode),
+        userType: isAgent ? "AGENT" : "USER",
+      });
+
+      // Clear tokens before redirecting to login
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("role");
+      localStorage.removeItem("username");
+      localStorage.removeItem("id");
+
+      alert("Registration successful! Please login with your credentials.");
+      navigate("/login");
+    } catch (err) {
+      console.error("Registration Error:", err);
+      const errorMessage =
+        err.response?.data?.error?.message ||
+        "Registration failed. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateStep()) {
+      return;
+    }
+
+    if (step < 3) {
+      nextStep();
+    } else if (step === 3) {
+      // Send OTP
+      await sendOtp();
+    } else if (step === 4) {
+      // Complete registration
+      await handleSignup();
+    }
+  };
+
+  const nextStep = () => {
+    setError(""); // Clear error when moving to next step
+    setStep((prev) => Math.min(prev + 1, 4));
+  };
+
+  const prevStep = () => {
+    setError(""); // Clear error when moving to previous step
+    setStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  const cities = ["New Delhi", "Mumbai", "Lucknow", "Gwalior", "Guwahati"];
 
   const stats = [
     { label: "Active Listings", value: "12,400+", icon: Building2 },
@@ -191,7 +362,7 @@ export default function Register() {
                 </h2>
                 <p className="text-zinc-500 text-sm">
                   {step === 1 && "Personal Details"}
-                  {step === 2 && "Location Information"}
+                  {step === 2 && "Location & Username"}
                   {step === 3 && "Security & Role"}
                   {step === 4 && "Verification"}
                 </p>
@@ -208,6 +379,18 @@ export default function Register() {
               />
             </div>
           </div>
+
+          {/* Error Display */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-400 text-sm"
+            >
+              <AlertCircle size={16} />
+              <span>{error}</span>
+            </motion.div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <AnimatePresence mode="wait">
@@ -226,6 +409,7 @@ export default function Register() {
                     placeholder="John Doe"
                     value={formData.fullName}
                     onChange={handleInputChange}
+                    required
                   />
                   <InputField
                     label="Email Address"
@@ -235,15 +419,17 @@ export default function Register() {
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
+                    required
                   />
                   <InputField
                     label="Phone Number"
                     icon={Phone}
                     name="phone"
                     type="tel"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="9876543210"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    required
                   />
                 </motion.div>
               )}
@@ -256,31 +442,70 @@ export default function Register() {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-4"
                 >
-                  <InputField
-                    label="City"
-                    icon={MapPin}
-                    name="city"
-                    placeholder="New York"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-500 ml-1 uppercase tracking-wider">
+                      City
+                    </label>
+                    <div className="relative group">
+                      <MapPin
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-orange-500 transition-colors z-10"
+                        size={18}
+                      />
+                      <select
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full pl-12 pr-4 py-3.5 bg-zinc-900 border border-zinc-800 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all text-sm appearance-none cursor-pointer text-white"
+                        style={{ backgroundColor: "#18181b" }}
+                      >
+                        <option value="" className="bg-zinc-900 text-zinc-400">
+                          Select City
+                        </option>
+                        {cities.map((city) => (
+                          <option
+                            key={city}
+                            value={city}
+                            className="bg-zinc-900 text-white"
+                          >
+                            {city}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Area and Pincode side by side */}
+                  <div className="grid grid-cols-2 gap-3">
                     <InputField
-                      label="Area"
+                      label="Area/Locality"
                       icon={Map}
                       name="area"
-                      placeholder="Manhattan"
+                      placeholder="Connaught Place"
                       value={formData.area}
                       onChange={handleInputChange}
+                      required
                     />
                     <InputField
                       label="Pincode"
                       name="pincode"
-                      placeholder="10001"
+                      placeholder="110001"
                       value={formData.pincode}
                       onChange={handleInputChange}
+                      required
                     />
                   </div>
+
+                  <InputField
+                    label="Username"
+                    icon={User}
+                    name="username"
+                    placeholder="john.doe123"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    required
+                    helperText="This will be your unique identifier"
+                  />
                 </motion.div>
               )}
 
@@ -300,6 +525,7 @@ export default function Register() {
                     placeholder="••••••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
+                    required
                   />
 
                   <div className="p-4 bg-zinc-900 rounded-2xl border border-zinc-800 flex items-center justify-between group hover:border-orange-500/30 transition-all">
@@ -344,14 +570,14 @@ export default function Register() {
                   <div>
                     <h3 className="text-xl font-bold">Verify your Email</h3>
                     <p className="text-zinc-500 text-sm mt-1">
-                      We've sent a 4-digit code to <br />
+                      We've sent a 6-digit code to <br />
                       <span className="text-zinc-300 font-medium">
                         {formData.email}
                       </span>
                     </p>
                   </div>
 
-                  <div className="flex justify-center gap-3">
+                  <div className="flex justify-center gap-2">
                     {otp.map((digit, idx) => (
                       <input
                         key={idx}
@@ -361,7 +587,8 @@ export default function Register() {
                         value={digit}
                         onChange={(e) => handleOtpChange(idx, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(idx, e)}
-                        className="w-14 h-16 bg-zinc-900 border border-zinc-800 rounded-xl text-center text-2xl font-bold text-orange-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                        className="w-12 h-14 bg-zinc-900 border border-zinc-800 rounded-xl text-center text-2xl font-bold text-orange-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                        autoComplete="off"
                       />
                     ))}
                   </div>
@@ -377,7 +604,7 @@ export default function Register() {
                     ) : (
                       <button
                         type="button"
-                        onClick={() => setTimer(30)}
+                        onClick={sendOtp}
                         className="text-orange-500 font-bold hover:underline"
                       >
                         Resend Code
@@ -393,7 +620,8 @@ export default function Register() {
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="flex-1 py-4 bg-zinc-900 border border-zinc-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-800 transition-all active:scale-[0.98]"
+                  disabled={isLoading}
+                  className="flex-1 py-4 bg-zinc-900 border border-zinc-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft size={18} />
                   Back
@@ -401,13 +629,20 @@ export default function Register() {
               )}
               <button
                 type="submit"
-                className="flex-[2] py-4 bg-orange-500 hover:bg-orange-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-500/10 active:scale-[0.98] group"
+                disabled={isLoading}
+                className="flex-[2] py-4 bg-orange-500 hover:bg-orange-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-500/10 active:scale-[0.98] group disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {step === 4 ? "Verify & Finish" : "Next Step"}
-                <ChevronRight
-                  size={18}
-                  className="group-hover:translate-x-1 transition-transform"
-                />
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    {step === 4 ? "Verify & Finish" : "Next Step"}
+                    <ChevronRight
+                      size={18}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -433,7 +668,13 @@ export default function Register() {
 }
 
 // Reusable Input Component for cleaner code
-function InputField({ label, icon: Icon, type = "text", ...props }) {
+function InputField({
+  label,
+  icon: Icon,
+  type = "text",
+  helperText,
+  ...props
+}) {
   return (
     <div className="space-y-1.5">
       {label && (
@@ -451,10 +692,14 @@ function InputField({ label, icon: Icon, type = "text", ...props }) {
         <input
           {...props}
           type={type}
-          required
-          className={`w-full ${Icon ? "pl-12" : "px-4"} pr-4 py-3.5 bg-zinc-900/50 border border-zinc-800 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all text-sm`}
+          autoComplete="off"
+          className={`w-full ${Icon ? "pl-12" : "px-4"} pr-4 py-3.5 bg-zinc-900 border border-zinc-800 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all text-sm text-white placeholder-zinc-500`}
+          style={{ backgroundColor: "#18181b" }}
         />
       </div>
+      {helperText && (
+        <p className="text-[10px] text-zinc-500 ml-1">{helperText}</p>
+      )}
     </div>
   );
 }

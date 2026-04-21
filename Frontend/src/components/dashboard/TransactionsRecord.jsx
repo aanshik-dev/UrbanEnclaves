@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import API from "../../api/axios"; // Adjust path to your axios config
+import API from "../../api/axios";
 import {
   History,
   Search,
@@ -9,7 +9,6 @@ import {
   Download,
   CheckCircle2,
   Clock,
-  XCircle,
 } from "lucide-react";
 
 export default function TransactionsRecord() {
@@ -17,6 +16,7 @@ export default function TransactionsRecord() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -45,13 +45,79 @@ export default function TransactionsRecord() {
       t.sellerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.transactionId?.toString().includes(searchQuery);
 
-    // Note: Adjusting filter logic as backend currently doesn't have a 'status' field
     const matchesStatus = filterStatus === "All" || t.mode === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
+  // Move export function INSIDE the component
+  const exportToCSV = () => {
+    if (filteredTransactions.length === 0) {
+      alert("No transactions to export");
+      return;
+    }
+
+    setExporting(true);
+
+    try {
+      // Define CSV headers
+      const headers = [
+        "Transaction ID",
+        "City",
+        "Listing Type",
+        "Property Type",
+        "Agent Name",
+        "Buyer Name",
+        "Seller Name",
+        "Amount (₹)",
+        "Listing Price (₹)",
+        "Payment Mode",
+        "Transaction Date",
+      ];
+
+      // Map data to rows
+      const rows = filteredTransactions.map((t) => [
+        `TR-${t.transactionId}`,
+        t.city || "",
+        t.listingType || "",
+        t.type || "",
+        t.agentName || "",
+        t.buyerName || "",
+        t.sellerName || "",
+        t.amount?.toLocaleString() || "0",
+        t.listingPrice?.toLocaleString() || "0",
+        t.mode || "",
+        t.transactionDate ? new Date(t.transactionDate).toLocaleDateString() : "",
+      ]);
+
+      // Combine headers and rows
+      const csvContent = [
+        headers.join(","),
+        ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+      ].join("\n");
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `transactions_export_${new Date().toISOString().split("T")[0]}.csv`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Failed to export transactions");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const getStatusColor = (status) => {
-    // Defaulting logic since status isn't in backend yet
     if (status === "ONLINE" || status === "BANK_TRANSFER")
       return "text-emerald-500 bg-emerald-500/10";
     return "text-blue-500 bg-blue-500/10";
@@ -81,8 +147,21 @@ export default function TransactionsRecord() {
             View and manage all financial transactions across the platform.
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all border border-zinc-700/50 text-xs">
-          <Download size={16} /> Export Records
+        <button
+          onClick={exportToCSV}
+          disabled={exporting}
+          className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all border border-zinc-700/50 text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {exporting ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <Download size={16} /> Export Records
+            </>
+          )}
         </button>
       </div>
 

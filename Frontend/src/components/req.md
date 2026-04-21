@@ -1,26 +1,3 @@
-Admin / Dashboard
-
-- Active agents also required - currently returning total agent
-
-office / dashboard
-
-> Top-agent
-> based on the score
-
-- Agent name
-
-Agent/Dashboard
-
-- Rating - returned null
-- performanceScore - returned null
-
-
-Agent/Dashboard
-> best selling property
-listType - SELL/RENT
-Price Sold
-Commission Earned
-
 
 Agent/Holdings
 Fix the inactive tokens not in transections

@@ -21,8 +21,6 @@ import API from "../api/axios";
 const Login = () => {
   const [role, setRole] = useState("USER");
   const [showPassword, setShowPassword] = useState(false);
-  // const [email, setEmail] = useState("admin@urban.enc");
-  // const [email, setEmail] = useState("office.delhi@urban.enc");
   const [email, setEmail] = useState("kiran.saxena@example.com");
   const [password, setPassword] = useState("password123");
   const navigate = useNavigate();

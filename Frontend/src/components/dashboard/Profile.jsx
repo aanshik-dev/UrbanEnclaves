@@ -136,7 +136,7 @@ export default function Profile({ role }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl px-4 mx-auto space-y-8">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold text-white tracking-tight">
@@ -224,12 +224,12 @@ export default function Profile({ role }) {
         {/* Profile Card */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-[2.5rem] text-center backdrop-blur-sm relative overflow-hidden group">
-            <div className="relative inline-block mb-6">
+            <div className="relative inline-block mb-4">
               {formData.profileUrl ? (
                 <img
                   src={formData.profileUrl}
                   alt={formData.name}
-                  className="w-32 h-32 rounded-[2.5rem] object-cover shadow-2xl shadow-orange-500/30"
+                  className="w-32 h-32 rounded-[2.5rem] object-cover"
                 />
               ) : (
                 <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-4xl font-bold shadow-2xl shadow-orange-500/30 uppercase">
@@ -249,17 +249,12 @@ export default function Profile({ role }) {
               @{formData.username}
             </p>
 
-            <div className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-500/10 rounded-xl border border-orange-500/20 text-orange-500 text-xs font-bold">
+            <div className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-500/10 rounded-xl border border-orange-500/20 text-orange-500 text-xs font-bold mb-4"> 
               <ShieldCheck size={14} /> Verified {userData?.userType || role}
             </div>
-          </div>
 
-          <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-[2.5rem] backdrop-blur-sm">
-            <h4 className="text-white font-bold mb-6 flex items-center gap-2">
-              <Info className="text-orange-500" size={18} /> ID Info
-            </h4>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
+              <div className="flex items-center justify-between p-2 px-4 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
                 <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest">
                   User ID
                 </span>
@@ -267,7 +262,7 @@ export default function Profile({ role }) {
                   #{formData.userId}
                 </span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
+              <div className="flex items-center justify-between p-2 px-4 bg-zinc-800/30 rounded-xl border border-zinc-800/50">
                 <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest">
                   Member Since
                 </span>
@@ -393,14 +388,6 @@ export default function Profile({ role }) {
                   />
                 </div>
               )}
-            </div>
-
-            <div className="pt-6 border-t border-zinc-800/50">
-              <div className="flex items-center gap-3 p-4 bg-orange-500/5 border border-orange-500/10 rounded-2xl text-orange-500/80 text-xs font-medium">
-                <AlertCircle size={16} />
-                You can edit your Name, Phone Number, Area, City, PIN Code, and
-                Profile URL. Email is read-only.
-              </div>
             </div>
           </form>
         </div>

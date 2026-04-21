@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import API from "../../api/axios";
+import { Link, useNavigate } from "react-router-dom";
 import {
   TrendingUp,
   Users,
@@ -68,6 +69,8 @@ export default function OfficeHome() {
   const [graphLoading, setGraphLoading] = useState(true);
   const [topAgentLoading, setTopAgentLoading] = useState(true);
   const [filterType, setFilterType] = useState("YEARLY");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -168,7 +171,7 @@ export default function OfficeHome() {
       {/* Header */}
       <div className="flex flex-col gap-0.5">
         <h1 className="text-2xl font-bold text-white tracking-tight">
-          Admin Dashboard
+          Office Dashboard
         </h1>
         <p className="text-zinc-400 text-sm font-medium">
           Welcome back, here's what's happening today.
@@ -332,7 +335,10 @@ export default function OfficeHome() {
                 </div>
               </div>
 
-              <button className="w-full mt-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 text-xs">
+              <button
+                onClick={() => navigate("/office/agents")}
+                className="w-full mt-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 text-xs"
+              >
                 View Profile <ArrowUpRight size={14} />
               </button>
             </div>
@@ -351,7 +357,10 @@ export default function OfficeHome() {
             <h3 className="text-lg font-bold text-white">
               Recent Transactions
             </h3>
-            <button className="text-orange-500 text-xs font-bold hover:underline">
+            <button
+              onClick={() => navigate("/office/transactions")}
+              className="text-orange-500 text-xs font-bold hover:underline"
+            >
               View All
             </button>
           </div>

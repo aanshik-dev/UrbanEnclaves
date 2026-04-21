@@ -21,6 +21,7 @@ import {
   Activity,
   CheckCircle2,
   UserPlus,
+  Building,
 } from "lucide-react";
 import PropertyCarousel from "./PropertyCarousel";
 import FilterPanel from "./FilterPanel";
@@ -71,8 +72,8 @@ const formatPrice = (price, listingType) => {
 // Helper function to get property title
 const getPropertyTitle = (property) => {
   if (!property) return "Property";
-  const bhkText = property.BHK === 1 ? "1 BHK" : `${property.BHK} BHK`;
-  return `${bhkText} ${property.type || "Property"} in ${property.area || property.city || "Prime Location"}`;
+  const bhkText = property.BHK === 1 ? "1 bhk" : `${property.BHK} BHK`;
+  return `${bhkText} ${property.type.toLowerCase() || "Property"} in ${property.area || property.city || "Prime Location"}`;
 };
 
 // Helper function to get location string
@@ -343,352 +344,360 @@ export default function UserHome() {
 
         {/* Property Details Preview - CORRECTED FOR API STRUCTURE */}
         {selectedProperty && (
-        <div className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-y-auto scrollbar-hide flex flex-col relative backdrop-blur-sm">
-  <div className="h-[350px] min-h-[350px] relative group">
-    <PropertyCarousel
-      images={selectedProperty.images}
-      title={getPropertyTitle(selectedProperty.property)}
-    />
-    <div className="absolute bottom-6 left-8 pointer-events-none">
-      <div className="flex items-center gap-3 mb-2">
-        <span className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg uppercase">
-          {selectedProperty.property.type}
-        </span>
-        <span className="text-white/80 text-xs font-medium flex items-center gap-1">
-          <MapPin size={12} /> {selectedProperty.property.area},{" "}
-          {selectedProperty.property.city}
-        </span>
-      </div>
-      <h2 className="text-2xl font-bold text-white tracking-tight">
-        {getPropertyTitle(selectedProperty.property)}
-      </h2>
-    </div>
-    <div className="absolute bottom-6 right-8 pointer-events-none">
-      <p className="text-2xl font-bold text-orange-500">
-        {formatPrice(
-          selectedProperty.price,
-          selectedProperty.listingType,
-        )}
-      </p>
-    </div>
-  </div>
-
-  <div className="p-6">
-    <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
-        <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
-          <Bed size={16} />
-        </div>
-        <div>
-          <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
-            Bedrooms
-          </p>
-          <p className="text-white font-bold text-sm">
-            {selectedProperty.property.BHK} BHK
-          </p>
-        </div>
-      </div>
-      <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
-        <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
-          <Bath size={16} />
-        </div>
-        <div>
-          <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
-            Type
-          </p>
-          <p className="text-white font-bold text-sm">
-            {selectedProperty.property.type}
-          </p>
-        </div>
-      </div>
-      <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
-        <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
-          <Square size={16} />
-        </div>
-        <div>
-          <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
-            Total Area
-          </p>
-          <p className="text-white font-bold text-sm">
-            {selectedProperty.property.size} sq ft
-          </p>
-        </div>
-      </div>
-      <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
-        <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
-          <Calendar size={16} />
-        </div>
-        <div>
-          <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
-            Listing Type
-          </p>
-          <p className="text-white font-bold text-sm">
-            {selectedProperty.listingType}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    {/* Full Address */}
-    <div className="mb-6">
-      <h4 className="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-        <MapPin className="text-orange-500" size={16} /> Location
-        Details
-      </h4>
-      <div className="bg-zinc-800/20 rounded-2xl border border-zinc-800/50 overflow-hidden">
-        <div className="grid grid-cols-2 sm:grid-cols-3">
-          <div className="p-4 border-b border-r border-zinc-800/50">
-            <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
-              Flat / House No
-            </p>
-            <p className="text-zinc-200 font-semibold text-sm">
-              {selectedProperty.property.houseNo}
-            </p>
-          </div>
-          <div className="p-4 border-b border-r sm:border-r border-zinc-800/50">
-            <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
-              Locality
-            </p>
-            <p className="text-zinc-200 font-semibold text-sm">
-              {selectedProperty.property.locality}
-            </p>
-          </div>
-          <div className="p-4 border-b border-zinc-800/50">
-            <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
-              Area
-            </p>
-            <p className="text-zinc-200 font-semibold text-sm">
-              {selectedProperty.property.area}
-            </p>
-          </div>
-          <div className="p-4 border-r border-zinc-800/50">
-            <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
-              City
-            </p>
-            <p className="text-zinc-200 font-semibold text-sm">
-              {selectedProperty.property.city}
-            </p>
-          </div>
-          <div className="p-4 border-r border-zinc-800/50">
-            <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
-              Pincode
-            </p>
-            <p className="text-zinc-200 font-semibold text-sm">
-              {selectedProperty.property.pin}
-            </p>
-          </div>
-          <div className="p-4">
-            <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
-              Country
-            </p>
-            <p className="text-zinc-200 font-semibold text-sm">
-              INDIA
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="mb-6">
-      <h4 className="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
-        <Info className="text-orange-500" size={16} /> Description
-      </h4>
-      <p className="text-zinc-400 text-sm leading-relaxed font-medium bg-zinc-800/20 p-4 rounded-xl border border-zinc-800/50">
-        {`Premium ${selectedProperty.property.BHK} BHK ${selectedProperty.property.type} located in the prime area of ${selectedProperty.property.locality}, ${selectedProperty.property.city}. The property features a spacious ${selectedProperty.property.size} sq.ft layout with modern amenities.`}
-      </p>
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Listing Details */}
-      <div className="space-y-4">
-        <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
-          <Activity className="text-orange-500" size={16} /> Listing
-          Details
-        </h4>
-        <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-zinc-400 text-xs font-medium">
-              Token ID
-            </span>
-            <span className="text-white font-bold text-xs">
-              #{selectedProperty.tokenId}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-zinc-400 text-xs font-medium">
-              Property ID
-            </span>
-            <span className="text-white font-bold text-xs">
-              #{selectedProperty.property.propertyId}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-zinc-400 text-xs font-medium">
-              Listing Date
-            </span>
-            <span className="text-white font-bold text-xs">
-              {(() => {
-                const [year, month, day] =
-                  selectedProperty.listingDate.split("-");
-                return `${day}-${month}-${year}`;
-              })()}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-zinc-400 text-xs font-medium">
-              Status
-            </span>
-            <span
-              className={`text-xs font-bold ${selectedProperty.status === "ACTIVE" ? "text-emerald-500" : "text-rose-500"}`}
-            >
-              {selectedProperty.status}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Owner Info */}
-      <div className="space-y-4">
-        <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
-          <User className="text-orange-500" size={16} /> Owner details
-        </h4>
-        <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
-          <div className="flex items-center gap-3 mb-4">
-            {/* Owner Profile Picture */}
-            {selectedProperty.owner?.profileUrl ? (
-              <img
-                src={selectedProperty.owner.profileUrl}
-                alt={selectedProperty.owner.name}
-                className="w-12 h-12 rounded-xl object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
+          <div className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-y-auto scrollbar-hide flex flex-col relative backdrop-blur-sm">
+            <div className="h-[450px] min-h-[450px] relative group">
+              <PropertyCarousel
+                images={selectedProperty.images}
+                title={getPropertyTitle(selectedProperty.property)}
               />
-            ) : null}
-            <div
-              className={`w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20 uppercase ${
-                selectedProperty.owner?.profileUrl ? 'hidden' : ''
-              }`}
-            >
-              {selectedProperty.owner?.name?.substring(0, 2) || "NA"}
-            </div>
-            <div>
-              <h5 className="text-white font-bold text-sm">
-                {selectedProperty.owner?.name || "Unknown"}
-              </h5>
-              <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">
-                Contact: {selectedProperty.owner?.phone || "N/A"}
-              </p>
-            </div>
-          </div>
-          <button className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 border border-zinc-700/50">
-            View Owner Profile
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-      {/* Agent Section */}
-      <div className="space-y-4">
-        <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
-          <Briefcase className="text-orange-500" size={16} /> Assigned
-          Agent
-        </h4>
-        <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
-          {selectedProperty.agent ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                {/* Agent Profile Picture */}
-                {selectedProperty.agent.profileUrl ? (
-                  <img
-                    src={selectedProperty.agent.profileUrl}
-                    alt={selectedProperty.agent.name}
-                    className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <div
-                  className={`w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20 uppercase flex-shrink-0 ${
-                    selectedProperty.agent.profileUrl ? 'hidden' : ''
-                  }`}
-                >
-                  {selectedProperty.agent.name?.substring(0, 2) || "AG"}
+              <div className="absolute bottom-6 left-8 pointer-events-none">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg uppercase">
+                    {selectedProperty.property.type}
+                  </span>
+                  <span className="text-white/80 text-sm font-medium flex items-center gap-1">
+                    <MapPin size={12} /> {selectedProperty.property.area},{" "}
+                    {selectedProperty.property.city}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <h5 className="text-white font-bold text-sm truncate">
-                      {selectedProperty.agent.name}
-                    </h5>
-                    <div className="flex items-center gap-1 text-orange-500">
-                      <Star size={14} fill="currentColor" />
-                      <span className="text-[11px] font-bold">
-                        {selectedProperty.agent.userRating || "N/A"} Rating
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  {getPropertyTitle(selectedProperty.property)}
+                </h2>
+              </div>
+              <div className="absolute bottom-6 right-8 pointer-events-none">
+                <p className="text-2xl font-bold text-orange-500">
+                  {formatPrice(
+                    selectedProperty.price,
+                    selectedProperty.listingType,
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
+                  <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
+                    <Bed size={16} />
+                  </div>
+                  <div>
+                    <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
+                      Bedrooms
+                    </p>
+                    <p className="text-white font-bold text-sm">
+                      {selectedProperty.property.BHK} BHK
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
+                  <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
+                    <Building size={16} />
+                  </div>
+                  <div>
+                    <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
+                      Type
+                    </p>
+                    <p className="text-white font-bold text-sm">
+                      {selectedProperty.property.type}
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
+                  <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
+                    <Square size={16} />
+                  </div>
+                  <div>
+                    <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
+                      Total Area
+                    </p>
+                    <p className="text-white font-bold text-sm">
+                      {selectedProperty.property.size} sq ft
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-zinc-800/30 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
+                  <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
+                    <Calendar size={16} />
+                  </div>
+                  <div>
+                    <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">
+                      Listing Type
+                    </p>
+                    <p className="text-white font-bold text-sm">
+                      {selectedProperty.listingType}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Full Address */}
+              <div className="mb-6">
+                <h4 className="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <MapPin className="text-orange-500" size={16} /> Location
+                  Details
+                </h4>
+                <div className="bg-zinc-800/20 rounded-2xl border border-zinc-800/50 overflow-hidden">
+                  <div className="grid grid-cols-2 sm:grid-cols-3">
+                    <div className="p-4 border-b border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Flat / House No
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.property.houseNo}
+                      </p>
+                    </div>
+                    <div className="p-4 border-b border-r sm:border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Locality
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.property.locality}
+                      </p>
+                    </div>
+                    <div className="p-4 border-b border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Area
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.property.area}
+                      </p>
+                    </div>
+                    <div className="p-4 border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        City
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.property.city}
+                      </p>
+                    </div>
+                    <div className="p-4 border-r border-zinc-800/50">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Pincode
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        {selectedProperty.property.pin}
+                      </p>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
+                        Country
+                      </p>
+                      <p className="text-zinc-200 font-semibold text-sm">
+                        INDIA
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <Info className="text-orange-500" size={16} /> Description
+                </h4>
+                <p className="text-zinc-400 text-sm leading-relaxed font-medium bg-zinc-800/20 p-4 rounded-xl border border-zinc-800/50">
+                  {`Premium ${selectedProperty.property.BHK} BHK ${selectedProperty.property.type} located in the prime area of ${selectedProperty.property.locality}, ${selectedProperty.property.city}. The property features a spacious ${selectedProperty.property.size} sq.ft layout with modern amenities.`}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Listing Details */}
+                <div className="space-y-4">
+                  <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <Activity className="text-orange-500" size={16} /> Listing
+                    Details
+                  </h4>
+                  <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400 text-xs font-medium">
+                        Token ID
+                      </span>
+                      <span className="text-white font-bold text-xs">
+                        #{selectedProperty.tokenId}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400 text-xs font-medium">
+                        Property ID
+                      </span>
+                      <span className="text-white font-bold text-xs">
+                        #{selectedProperty.property.propertyId}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400 text-xs font-medium">
+                        Listing Date
+                      </span>
+                      <span className="text-white font-bold text-xs">
+                        {(() => {
+                          const [year, month, day] =
+                            selectedProperty.listingDate.split("-");
+                          return `${day}-${month}-${year}`;
+                        })()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400 text-xs font-medium">
+                        Status
+                      </span>
+                      <span
+                        className={`text-xs font-bold ${selectedProperty.status === "ACTIVE" ? "text-emerald-500" : "text-rose-500"}`}
+                      >
+                        {selectedProperty.status}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2.5 text-zinc-400 text-xs hover:text-white transition-colors cursor-pointer mt-2">
-                    <Phone
-                      size={12}
-                      className="text-orange-500 flex-shrink-0"
-                    />
-                    <span className="font-medium truncate">
-                      {selectedProperty.agent.phone}
-                    </span>
+                </div>
+
+                {/* Owner Info */}
+                <div className="space-y-4">
+                  <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <User className="text-orange-500" size={16} /> Owner details
+                  </h4>
+                  <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
+                    <div className="flex items-center gap-3 mb-4">
+                      {/* Owner Profile Picture */}
+                      {selectedProperty.owner?.profileUrl ? (
+                        <img
+                          src={selectedProperty.owner.profileUrl}
+                          alt={selectedProperty.owner.name}
+                          className="w-12 h-12 rounded-xl object-cover"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.nextSibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={`w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20 uppercase ${
+                          selectedProperty.owner?.profileUrl ? "hidden" : ""
+                        }`}
+                      >
+                        {selectedProperty.owner?.name?.substring(0, 2) || "NA"}
+                      </div>
+                      <div>
+                        <h5 className="text-white font-bold text-sm">
+                          {selectedProperty.owner?.name || "Unknown"}
+                        </h5>
+                        <div className="flex items-center gap-2.5 text-zinc-400 text-xs hover:text-white transition-colors cursor-pointer mt-2">
+                          <Phone
+                            size={12}
+                            className="text-orange-500 flex-shrink-0"
+                          />
+                          <span className="font-medium truncate">
+                            {selectedProperty.owner?.phone || "N/A"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 border border-zinc-700/50">
+                      View Owner Profile
+                    </button>
                   </div>
                 </div>
               </div>
-              <button className="w-full py-2.5 border border-orange-500/30 hover:bg-orange-500/10 text-orange-500 font-bold rounded-lg transition-all text-xs">
-                Contact Agent
-              </button>
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-zinc-500 text-sm">
-                No agent assigned to this property
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Representative Request */}
-      <div className="space-y-6">
-        <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
-          <h4 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
-            <Handshake className="text-orange-500" size={16} /> Make a
-            Deal
-          </h4>
-          <div className="flex items-center justify-between mb-4 p-3 bg-zinc-900/50 rounded-xl border border-zinc-800">
-            <div className="flex items-center gap-3">
-              <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
-                <Calendar size={16} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {/* Agent Section */}
+                <div className="space-y-4">
+                  <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <Briefcase className="text-orange-500" size={16} /> Assigned
+                    Agent
+                  </h4>
+                  <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
+                    {selectedProperty.agent ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          {/* Agent Profile Picture */}
+                          {selectedProperty.agent.profileUrl ? (
+                            <img
+                              src={selectedProperty.agent.profileUrl}
+                              alt={selectedProperty.agent.name}
+                              className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                e.target.nextSibling.style.display = "flex";
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className={`w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20 uppercase flex-shrink-0 ${
+                              selectedProperty.agent.profileUrl ? "hidden" : ""
+                            }`}
+                          >
+                            {selectedProperty.agent.name?.substring(0, 2) ||
+                              "AG"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                              <h5 className="text-white font-bold text-sm truncate">
+                                {selectedProperty.agent.name}
+                              </h5>
+                              <div className="flex items-center gap-1 text-orange-500">
+                                <Star size={14} fill="currentColor" />
+                                <span className="text-[11px] font-bold">
+                                  {selectedProperty.agent.userRating || "N/A"}{" "}
+                                  Rating
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2.5 text-zinc-400 text-xs hover:text-white transition-colors cursor-pointer mt-2">
+                              <Phone
+                                size={12}
+                                className="text-orange-500 flex-shrink-0"
+                              />
+                              <span className="font-medium truncate">
+                                {selectedProperty.agent.phone}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <button className="w-full py-2.5 border border-orange-500/30 hover:bg-orange-500/10 text-orange-500 font-bold rounded-lg transition-all text-xs">
+                          Contact Agent
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <p className="text-zinc-500 text-sm">
+                          No agent assigned to this property
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Representative Request */}
+                <div className="space-y-6">
+                  <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
+                    <h4 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
+                      <Handshake className="text-orange-500" size={16} /> Make a
+                      Deal
+                    </h4>
+                    <div className="flex items-center justify-between mb-4 p-3 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
+                          <Calendar size={16} />
+                        </div>
+                        <span className="text-xs font-bold text-zinc-300">
+                          Visit Property
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setIsVisitToggle(!isVisitToggle)}
+                        className={`w-10 h-5 rounded-full transition-all relative ${isVisitToggle ? "bg-orange-500" : "bg-zinc-700"}`}
+                      >
+                        <div
+                          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${isVisitToggle ? "left-5.5" : "left-0.5"}`}
+                        ></div>
+                      </button>
+                    </div>
+                    <button className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 text-sm">
+                      Make a Deal <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <span className="text-xs font-bold text-zinc-300">
-                Visit Property
-              </span>
             </div>
-            <button
-              onClick={() => setIsVisitToggle(!isVisitToggle)}
-              className={`w-10 h-5 rounded-full transition-all relative ${isVisitToggle ? "bg-orange-500" : "bg-zinc-700"}`}
-            >
-              <div
-                className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${isVisitToggle ? "left-5.5" : "left-0.5"}`}
-              ></div>
-            </button>
           </div>
-          <button className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 text-sm">
-            Make a Deal <ChevronRight size={16} />
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
         )}
       </div>
 

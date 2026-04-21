@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"; // Added useEffect
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import API from "../../api/axios";
 import {
   Users,
@@ -15,6 +15,8 @@ import {
   Calendar,
   Mail,
   Phone,
+  TrendingUp,
+  Clock,
 } from "lucide-react";
 import FilterPanel from "./FilterPanel";
 
@@ -40,6 +42,7 @@ export default function AgentPerformance() {
         // Access nested "data" from ThunderClient response
         const fetchedAgents = response.data.data || response.data;
         setAgentData(fetchedAgents);
+        console.log("Agent Performance Data:", fetchedAgents);
 
         // Auto-select first agent
         if (fetchedAgents.length > 0) {
@@ -74,10 +77,13 @@ export default function AgentPerformance() {
       </div>
     );
 
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  console.log(circumference);
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]">
+    <div className="flex flex-col h-[calc(100vh-130px)]">
       {/* Header & Search */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex flex-col gap-0.5">
           <h1 className="text-2xl font-bold text-white tracking-tight">
             Agent Performance
@@ -87,7 +93,7 @@ export default function AgentPerformance() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative group w-48">
+          <div className="relative group w-100">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500"
               size={14}
@@ -105,7 +111,7 @@ export default function AgentPerformance() {
 
       <div className="flex-1 flex gap-6 min-h-0 relative">
         {/* Agent List */}
-        <div className="w-[380px] space-y-3 overflow-y-auto pr-2 scrollbar-hide">
+        <div className="flex-1 space-y-3 overflow-y-auto pr-2 scrollbar-hide">
           {filteredAgents.map((agent) => (
             <motion.div
               key={agent.agentId}
@@ -118,15 +124,30 @@ export default function AgentPerformance() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-orange-500/20 uppercase">
-                  {agent.agentName?.substring(0, 2)}
+                {/* Profile Image with fallback to initials */}
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-orange-500/20 uppercase overflow-hidden">
+                  {agent.profileUrl ? (
+                    <img
+                      src={agent.profileUrl}
+                      alt={agent.agentName}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.style.display = "none";
+                        e.target.parentElement.innerText =
+                          agent.agentName?.substring(0, 2);
+                      }}
+                    />
+                  ) : (
+                    agent.agentName?.substring(0, 2)
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-0.5">
                     <h3 className="text-white font-bold truncate text-sm">
                       {agent.agentName}
                     </h3>
-                    <div className="flex items-center gap-1 text-orange-500">
+                    <div className="flex items-center gap-1 text-orange-500 pr-2">
                       <Star size={10} fill="currentColor" />
                       <span className="text-[10px] font-bold">
                         {agent.user_rating}
@@ -158,14 +179,29 @@ export default function AgentPerformance() {
 
         {/* Agent Detail Panel */}
         {selectedAgent && (
-          <div className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-y-auto scrollbar-hide flex flex-col backdrop-blur-sm">
+          <div className="flex-2 bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-y-auto scrollbar-hide flex flex-col backdrop-blur-sm">
             <div className="p-6 border-b border-zinc-800/50 bg-gradient-to-br from-zinc-900/80 to-transparent">
               <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-2xl font-bold uppercase">
-                  {selectedAgent.agentName?.substring(0, 2)}
+                {/* Profile Image with fallback */}
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-2xl font-bold uppercase overflow-hidden">
+                  {selectedAgent.profileUrl ? (
+                    <img
+                      src={selectedAgent.profileUrl}
+                      alt={selectedAgent.agentName}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.style.display = "none";
+                        e.target.parentElement.innerText =
+                          selectedAgent.agentName?.substring(0, 2);
+                      }}
+                    />
+                  ) : (
+                    selectedAgent.agentName?.substring(0, 2)
+                  )}
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <div className="flex flex-col md:flex-row md:items-center gap-3 mb-3">
+                  <div className="flex flex-col md:flex-row md:items-center gap-3 my-2">
                     <h2 className="text-2xl font-bold text-white tracking-tight">
                       {selectedAgent.agentName}
                     </h2>
@@ -179,7 +215,7 @@ export default function AgentPerformance() {
                       {selectedAgent.agentStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-2">
                     <div className="flex items-center gap-2 text-zinc-400 text-xs font-medium">
                       <Award className="text-orange-500" size={14} />
                       <span>AID: {selectedAgent.agentId}</span>
@@ -188,13 +224,17 @@ export default function AgentPerformance() {
                       <Calendar className="text-orange-500" size={14} />
                       <span>Exp: {selectedAgent.experience} Years</span>
                     </div>
+                    <div className="flex items-center gap-2 text-zinc-400 text-xs font-medium">
+                      <TrendingUp className="text-orange-500" size={14} />
+                      <span>Commission: {selectedAgent.commissionRate}%</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-zinc-800/30 p-4 rounded-2xl border border-zinc-800/50">
                   <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
                     Total Sales
@@ -230,57 +270,161 @@ export default function AgentPerformance() {
                 </div>
                 <div className="bg-zinc-800/30 p-4 rounded-2xl border border-zinc-800/50">
                   <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-1">
-                    Rating
+                    Deals Left
                   </p>
                   <div className="flex items-center gap-2">
-                    <Star
-                      className="text-orange-500 fill-orange-500"
-                      size={16}
-                    />
+                    <Clock className="text-orange-500" size={16} />
                     <span className="text-lg font-bold text-white">
-                      {selectedAgent.user_rating}
+                      {selectedAgent.deals_left}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Performance Bars - Using 'score' field for progress */}
-                <div className="space-y-6">
+              <div className="w-full flex gap-8 items-stretch">
+                <div className="space-y-4 flex-2">
                   <h4 className="text-white font-bold flex items-center gap-2 text-sm">
                     <BarChart3 className="text-orange-500" size={18} />{" "}
                     Performance Score
                   </h4>
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-[11px] font-bold">
-                      <span className="text-zinc-400">Activity Score</span>
-                      <span className="text-white">{selectedAgent.score}%</span>
-                    </div>
-                    <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${selectedAgent.score}%` }}
-                        className="h-full bg-orange-500"
-                      />
+                  <div className="flex flex-col items-center justify-center p-3 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
+                    {/* Circular Progress Bar */}
+                    <div className="relative w-32 h-32">
+                      <svg className="w-full h-full transform -rotate-90">
+                        {/* Background circle */}
+                        <circle
+                          cx="64"
+                          cy="64"
+                          r={radius}
+                          stroke="rgba(255, 255, 255, 0.1)"
+                          strokeWidth="10"
+                          fill="none"
+                        />
+                        {/* Progress circle */}
+                        <motion.circle
+                          cx="64"
+                          cy="64"
+                          r={radius}
+                          stroke="url(#gradient)"
+                          strokeWidth="10"
+                          fill="none"
+                          strokeLinecap="round"
+                          initial={{
+                            strokeDasharray: circumference,
+                            strokeDashoffset: circumference,
+                          }}
+                          animate={{
+                            strokeDashoffset:
+                              circumference -
+                              (circumference * selectedAgent.score) / 100,
+                          }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                        />
+                        <defs>
+                          <linearGradient
+                            id="gradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                          >
+                            <stop offset="0%" stopColor="#f97316" />
+                            <stop offset="100%" stopColor="#ea580c" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-[20px] font-bold text-white">
+                          {selectedAgent.score}%
+                        </span>
+                        <span className="text-[10px] text-zinc-500">Score</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Contact Info */}
-                <div className="space-y-6">
+                <div className="space-y-4 flex-2">
+                  <h4 className="text-white font-bold flex items-center gap-2 text-sm">
+                    <Star className="text-orange-500" size={18} /> User Rating
+                  </h4>
+
+                  <div className="flex flex-col items-center justify-center p-3 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
+                    {/* Circular Progress Bar */}
+                    <div className="relative w-32 h-32">
+                      <svg className="w-full h-full transform -rotate-90">
+                        {/* Background circle */}
+                        <circle
+                          cx="64"
+                          cy="64"
+                          r={radius}
+                          stroke="rgba(255, 255, 255, 0.1)"
+                          strokeWidth="10"
+                          fill="none"
+                        />
+                        {/* Progress circle */}
+                        <motion.circle
+                          cx="64"
+                          cy="64"
+                          r={radius}
+                          stroke="url(#gradient)"
+                          strokeWidth="10"
+                          fill="none"
+                          strokeLinecap="round"
+                          initial={{
+                            strokeDasharray: circumference,
+                            strokeDashoffset: circumference,
+                          }}
+                          animate={{
+                            strokeDashoffset:
+                              circumference *
+                              (1 - selectedAgent.user_rating / 5),
+                          }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                        />
+
+                        <defs>
+                          <linearGradient
+                            id="gradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                          >
+                            <stop offset="0%" stopColor="#f97316" />
+                            <stop offset="100%" stopColor="#ea580c" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pb-2">
+                        <span className="text-[20px] font-bold text-white">
+                          {selectedAgent.user_rating}
+                        </span>
+                        <span className="flex justify-center items-center gap-1 text-[10px] text-zinc-500">
+                          <Star
+                            className="text-orange-500 fill-orange-500"
+                            size={12}
+                          />
+                          Rating
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 flex-3 flex flex-col">
                   <h4 className="text-white font-bold flex items-center gap-2 text-sm">
                     <Mail className="text-orange-500" size={18} /> Contact Info
                   </h4>
-                  <div className="p-4 bg-zinc-800/30 rounded-2xl border border-zinc-800/50 space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-zinc-900/50 rounded-xl">
+                  <div className="flex-1 flex flex-col justify-center p-6 bg-zinc-800/30 rounded-2xl border border-zinc-800/50 gap-8">
+                    <div className="flex items-center gap-3 bg-zinc-900/50 rounded-xl">
                       <Mail size={14} className="text-orange-500" />
-                      <p className="text-white font-bold text-xs">
+                      <p className="text-white text-md">
                         {selectedAgent.email}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 p-3 bg-zinc-900/50 rounded-xl">
+                    <div className="flex items-center gap-3 bg-zinc-900/50 rounded-xl">
                       <Phone size={14} className="text-orange-500" />
-                      <p className="text-white font-bold text-xs">
+                      <p className="text-white text-md">
                         {selectedAgent.phone}
                       </p>
                     </div>

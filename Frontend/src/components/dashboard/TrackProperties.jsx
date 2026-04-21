@@ -98,90 +98,97 @@ export default function TrackProperties() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)]">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex flex-col gap-0.5">
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Track Properties
-          </h1>
-          <p className="text-zinc-400 text-sm font-medium">
-            Monitor your personal listings and handler offices.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative group w-48">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors"
-              size={14}
-            />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 pl-9 pr-3 text-zinc-200 focus:outline-none focus:border-orange-500/50 transition-all text-xs font-medium"
-            />
-          </div>
-        </div>
-      </div>
-
       <div className="flex-1 flex gap-6 min-h-0">
-        {/* Listings List */}
-        <div className="w-[380px] overflow-y-auto pr-2 space-y-3 scrollbar-hide">
-          {filteredProperties.map((property) => (
-            <motion.div
-              key={property.id}
-              onClick={() => setSelectedProperty(property)}
-              whileHover={{ x: 4 }}
-              className={`p-3 rounded-2xl border cursor-pointer transition-all group ${
-                selectedProperty?.id === property.id
-                  ? "bg-orange-500/10 border-orange-500 shadow-lg shadow-orange-500/5"
-                  : "bg-zinc-900/50 border-zinc-800 hover:border-orange-500/30"
-              }`}
-            >
-              <div className="flex gap-3">
-                <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-zinc-800">
-                  <img
-                    src={property.images[0]}
-                    alt="property thumb"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">
-                      #{property.id}
-                    </span>
-                    <span className="text-orange-500 font-bold text-xs uppercase">
-                      {property.type}
-                    </span>
+        {/* Listings List with Search Bar on Top */}
+        <div className="w-[380px] flex flex-col gap-3 overflow-y-auto pr-2 scrollbar-hide">
+          {/* Search Bar - Moved to top of list */}
+          <div className="sticky top-0 z-10 pt-1 pb-2 bg-black/80 backdrop-blur-sm -mt-1">
+            <div className="relative group w-full">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors"
+                size={14}
+              />
+              <input
+                type="text"
+                placeholder="Search properties by locality, city, area, pincode or type..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 pl-9 pr-3 text-zinc-200 focus:outline-none focus:border-orange-500/50 transition-all text-xs font-medium"
+              />
+            </div>
+          </div>
+
+          {/* Property List */}
+          <div className="space-y-3">
+            {filteredProperties.map((property) => (
+              <motion.div
+                key={property.id}
+                onClick={() => setSelectedProperty(property)}
+                whileHover={{ x: 4 }}
+                className={`p-3 rounded-2xl border cursor-pointer transition-all group ${
+                  selectedProperty?.id === property.id
+                    ? "bg-orange-500/10 border-orange-500 shadow-lg shadow-orange-500/5"
+                    : "bg-zinc-900/50 border-zinc-800 hover:border-orange-500/30"
+                }`}
+              >
+                <div className="flex gap-3">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-zinc-800">
+                    <img
+                      src={property.images[0]}
+                      alt="property thumb"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
                   </div>
-                  <h3 className="text-white font-bold truncate text-sm mb-0.5">
-                    {property.BHK} BHK • {property.locality}
-                  </h3>
-                  <div className="flex items-center gap-1 text-zinc-500 text-[10px] mb-1.5">
-                    <MapPin size={10} />
-                    <span className="truncate">
-                      {property.area}, {property.city}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-lg bg-orange-500/20 flex items-center justify-center text-[9px] font-bold text-orange-500 uppercase">
-                        {property.owner?.name?.substring(0, 2)}
-                      </div>
-                      <span className="text-zinc-400 text-[9px] font-bold truncate max-w-[80px]">
-                        {property.owner?.name}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">
+                        #{property.id}
+                      </span>
+                      <span className="text-orange-500 font-bold text-xs uppercase">
+                        {property.type}
                       </span>
                     </div>
-                    <span className="text-zinc-600 text-[9px] font-bold">
-                      {property.year_built}
-                    </span>
+                    <h3 className="text-white font-bold truncate text-sm mb-0.5">
+                      {property.BHK} BHK • {property.locality}
+                    </h3>
+                    <div className="flex items-center gap-1 text-zinc-500 text-[10px] mb-1.5">
+                      <MapPin size={10} />
+                      <span className="truncate">
+                        {property.area}, {property.city}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {/* Profile image from API for owner */}
+                        <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-[9px] font-bold text-white uppercase overflow-hidden">
+                          {property.owner?.profileUrl ? (
+                            <img
+                              src={property.owner.profileUrl}
+                              alt={property.owner?.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = "none";
+                                e.target.parentElement.innerText = property.owner?.name?.substring(0, 2);
+                              }}
+                            />
+                          ) : (
+                            property.owner?.name?.substring(0, 2)
+                          )}
+                        </div>
+                        <span className="text-zinc-400 text-[9px] font-bold truncate max-w-[80px]">
+                          {property.owner?.name}
+                        </span>
+                      </div>
+                      <span className="text-zinc-600 text-[9px] font-bold">
+                        {property.year_built}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         {/* Property Detail Panel */}
@@ -374,7 +381,7 @@ export default function TrackProperties() {
                   </div>
                 </div>
 
-                {/* Owner Info */}
+                {/* Owner Info with Profile Image from API */}
                 <div className="space-y-4">
                   <h4 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
                     <Briefcase className="text-orange-500" size={16} /> Owner
@@ -382,8 +389,21 @@ export default function TrackProperties() {
                   </h4>
                   <div className="p-5 bg-zinc-800/20 rounded-2xl border border-zinc-800/50">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20 uppercase">
-                        {selectedProperty.owner?.name?.substring(0, 2)}
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/20 uppercase overflow-hidden">
+                        {selectedProperty.owner?.profileUrl ? (
+                          <img
+                            src={selectedProperty.owner.profileUrl}
+                            alt={selectedProperty.owner?.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.style.display = "none";
+                              e.target.parentElement.innerText = selectedProperty.owner?.name?.substring(0, 2);
+                            }}
+                          />
+                        ) : (
+                          selectedProperty.owner?.name?.substring(0, 2)
+                        )}
                       </div>
                       <div>
                         <h5 className="text-white font-bold text-sm">

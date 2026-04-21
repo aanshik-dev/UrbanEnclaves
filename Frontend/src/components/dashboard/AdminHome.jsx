@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import API from "../../api/axios";
+import { Link, useNavigate } from "react-router-dom";
 import {
   TrendingUp,
   Users,
@@ -67,6 +68,8 @@ export default function AdminHome() {
   const [graphLoading, setGraphLoading] = useState(true);
   const [topAgentLoading, setTopAgentLoading] = useState(true);
   const [filterType, setFilterType] = useState("YEARLY");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -188,7 +191,7 @@ export default function AdminHome() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Chart */}
-        <div className="lg:col-span-2 bg-zinc-900/50 border border-zinc-800 p-6 rounded-[1.5rem] backdrop-blur-sm">
+        <div className="flex flex-col lg:col-span-2 bg-zinc-900/50 border border-zinc-800 p-6 rounded-[1.5rem] backdrop-blur-sm">
           {/* Chart Loading Overlay */}
           {graphLoading && (
             <div className="absolute inset-0 bg-zinc-950/20 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-[1.5rem]">
@@ -215,7 +218,7 @@ export default function AdminHome() {
               />
             </div>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="flex-1 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={graphData?.chart || []}>
                 <defs>
@@ -311,7 +314,7 @@ export default function AdminHome() {
                 </div>
               </div>
 
-              <button className="w-full mt-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 text-xs">
+              <button onClick={()=>navigate("/admin/agents")} className="w-full mt-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 text-xs">
                 View Profile <ArrowUpRight size={14} />
               </button>
             </div>
@@ -330,7 +333,10 @@ export default function AdminHome() {
             <h3 className="text-lg font-bold text-white">
               Recent Transactions
             </h3>
-            <button className="text-orange-500 text-xs font-bold hover:underline">
+            <button
+              onClick={() => navigate("/admin/transactions")}
+              className="text-orange-500 text-xs font-bold hover:underline"
+            >
               View All
             </button>
           </div>
