@@ -86,7 +86,9 @@ export default function TransactionsRecord() {
         t.amount?.toLocaleString() || "0",
         t.listingPrice?.toLocaleString() || "0",
         t.mode || "",
-        t.transactionDate ? new Date(t.transactionDate).toLocaleDateString() : "",
+        t.transactionDate
+          ? new Date(t.transactionDate).toLocaleDateString()
+          : "",
       ]);
 
       // Combine headers and rows

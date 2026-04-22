@@ -69,7 +69,8 @@ const Sidebar = ({ role, isCollapsed, setIsCollapsed }) => {
 
   const userItems = [
     { title: "Listings", path: "/user/home", icon: Home },
-    { title: "My Properties", path: "/user/properties", icon: Building2 },
+    { title: "My Ownings", path: "/user/properties", icon: Building2 },
+    { title: "My Listings", path: "/user/listings", icon: Map },
     { title: "Profile", path: "/user/profile", icon: User },
     { title: "About", path: "/user/about", icon: Info },
     { title: "Settings", path: "/user/settings", icon: Settings },
@@ -197,22 +198,56 @@ const TopBar = ({ role }) => {
   ];
 
   const timeBasedGreetings = [
-    { start: 5, end: 12, text: "Good morning! Ready to find your dream home?", icon: "line-md:sun-rising-twotone-loop" },
-    { start: 12, end: 17, text: "Good afternoon! Let's explore amazing properties", icon: "lucide:sun" },
-    { start: 17, end: 21, text: "Good evening! Perfect time to find your sanctuary", icon: "lucide:moon" },
-    { start: 21, end: 24, text: "Your dream home is waiting to be discovered", icon: "material-symbols:stars-2-rounded" },
-    { start: 0, end: 5, text: "Your dream home never sleeps", icon: "lucide:moon-star" },
+    {
+      start: 5,
+      end: 12,
+      text: "Good morning! Ready to find your dream home?",
+      icon: "line-md:sun-rising-twotone-loop",
+    },
+    {
+      start: 12,
+      end: 17,
+      text: "Good afternoon! Let's explore amazing properties",
+      icon: "lucide:sun",
+    },
+    {
+      start: 17,
+      end: 21,
+      text: "Good evening! Perfect time to find your sanctuary",
+      icon: "lucide:moon",
+    },
+    {
+      start: 21,
+      end: 24,
+      text: "Your dream home is waiting to be discovered",
+      icon: "material-symbols:stars-2-rounded",
+    },
+    {
+      start: 0,
+      end: 5,
+      text: "Your dream home never sleeps",
+      icon: "lucide:moon-star",
+    },
   ];
 
   const professionalQuotes = [
     { text: "Market insights at your command", icon: "lucide:trending-up" },
-    { text: "Managing premium properties with precision", icon: "lucide:building-2" },
+    {
+      text: "Managing premium properties with precision",
+      icon: "lucide:building-2",
+    },
     { text: "Tracking real estate excellence", icon: "lucide:line-chart" },
-    { text: "Precision in every transaction", icon: "material-symbols:check-circle-unread-outline-rounded" },
+    {
+      text: "Precision in every transaction",
+      icon: "material-symbols:check-circle-unread-outline-rounded",
+    },
     { text: "Your property management hub", icon: "lucide:layers" },
     { text: "Excellence in real estate services", icon: "lucide:trophy" },
     { text: "Smart search, smarter results", icon: "lucide:search" },
-    { text: "Curated properties for discerning clients", icon: "lucide:diamond" },
+    {
+      text: "Curated properties for discerning clients",
+      icon: "lucide:diamond",
+    },
   ];
 
   useEffect(() => {
@@ -244,17 +279,17 @@ const TopBar = ({ role }) => {
     const allGreetings = [...greetings, ...professionalQuotes];
     const currentHour = new Date().getHours();
     const isTimeBased = Math.random() < 0.3;
-    
+
     if (isTimeBased) {
       const timeGreeting = timeBasedGreetings.find(
-        g => currentHour >= g.start && currentHour < g.end
+        (g) => currentHour >= g.start && currentHour < g.end,
       );
       if (timeGreeting) {
         setGreeting(timeGreeting);
         return;
       }
     }
-    
+
     const randomIndex = Math.floor(Math.random() * allGreetings.length);
     setGreeting(allGreetings[randomIndex]);
   };
@@ -269,7 +304,8 @@ const TopBar = ({ role }) => {
       .slice(0, 2);
   };
 
-  const displayName = userData?.name || localStorage.getItem("username") || "User";
+  const displayName =
+    userData?.name || localStorage.getItem("username") || "User";
   const displayRole = role || localStorage.getItem("role") || "USER";
 
   if (!greeting) return null;
@@ -292,21 +328,21 @@ const TopBar = ({ role }) => {
             <p className="text-zinc-400 text-xs font-medium mb-0.5">
               Welcome back, {displayName.split(" ")[0]}
             </p>
-            <p className="text-white font-semibold text-sm">
-              {greeting.text}
-            </p>
+            <p className="text-white font-semibold text-sm">{greeting.text}</p>
           </div>
         </motion.div>
       </div>
 
       {/* Quick Stats */}
-      <div className="hidden lg:flex items-center gap-6 mr-4">
+      {/* <div className="hidden lg:flex items-center gap-6 mr-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
             <TrendingUp size={14} className="text-emerald-500" />
           </div>
           <div>
-            <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Active Listings</p>
+            <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              Active Listings
+            </p>
             <p className="text-white font-bold text-sm">2,847</p>
           </div>
         </div>
@@ -316,11 +352,13 @@ const TopBar = ({ role }) => {
             <Building2 size={14} className="text-blue-500" />
           </div>
           <div>
-            <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Properties Sold</p>
+            <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              Properties Sold
+            </p>
             <p className="text-white font-bold text-sm">15.2K</p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex justify-end items-center gap-4">
         <div className="h-10 w-[1px] bg-zinc-800 mx-2"></div>
@@ -328,9 +366,9 @@ const TopBar = ({ role }) => {
         <div className="flex items-center gap-3 pl-4">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold text-white">{displayName}</p>
-            <p className="text-xs text-zinc-500 font-medium">{displayRole}</p>
+            <p className="text-xs mt-1 text-zinc-500 font-medium">{displayRole}</p>
           </div>
-          
+
           {/* Avatar with Profile Image Support */}
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold shadow-lg shadow-orange-500/20 overflow-hidden">
             {!loading && userData?.profileUrl && !imageError ? (

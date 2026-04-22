@@ -25,6 +25,7 @@ import AgentListings from "./components/dashboard/AgentListings";
 import Holdings from "./components/dashboard/Holdings";
 import About from "./components/dashboard/About";
 import OfficeHome from "./components/dashboard/OfficeHome";
+import MyListings from "./components/dashboard/MyListings";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -104,6 +105,7 @@ function App() {
             <Route index element={<Navigate to="/user/home" replace />} />
             <Route path="home" element={<UserHome />} />
             <Route path="properties" element={<MyProperties />} />
+            <Route path="listings" element={<MyListings />} />
             <Route
               path="notifications"
               element={<Notifications role="USER" />}

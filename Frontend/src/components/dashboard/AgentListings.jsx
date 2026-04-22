@@ -159,6 +159,7 @@ export default function AgentListings() {
         p.area || "",
         String(p.pin || ""),
         String(p.propertyId || ""),
+        String(token.tokenId || ""),
       ];
       if (!matchFields.some((s) => s.toLowerCase().includes(query)))
         return false;

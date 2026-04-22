@@ -562,16 +562,19 @@ export default function Holdings() {
                   alt={getPropertyTitle(property)}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                {/* Pay Now Button - appears on hover */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <button
-                    onClick={() => openPaymentModal(h)}
-                    className="px-3 py-2 text-xs bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all transform scale-90 group-hover:scale-100 flex items-center gap-2 shadow-lg"
-                  >
-                    <CreditCard size={16} />
-                    Pay Now
-                  </button>
-                </div>
+
+                {/* Pay Now Button - appears on hover (only for active properties) */}
+                {h.status === "ACTIVE" && (
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <button
+                      onClick={() => openPaymentModal(h)}
+                      className="px-3 py-2 text-xs bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all transform scale-90 group-hover:scale-100 flex items-center gap-2 shadow-lg"
+                    >
+                      <CreditCard size={16} />
+                      Pay Now
+                    </button>
+                  </div>
+                )}
                 <div className="absolute top-3 right-3">
                   <span
                     className={`px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg ${

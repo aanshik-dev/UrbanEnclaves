@@ -1,3 +1,4 @@
+// MyProperties.jsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../api/axios";
@@ -13,12 +14,12 @@ import {
   Bed,
   Square,
   Calendar,
-  DollarSign,
-  User,
-  Phone,
-  Star,
   AlertCircle,
   CheckCircle2,
+  Home,
+  TrendingUp,
+  TrendingDown,
+  Eye,
 } from "lucide-react";
 
 const FALLBACK_IMAGES = [
@@ -27,9 +28,6 @@ const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=2000&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?q=80&w=2074&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?q=80&w=2073&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1448630360428-65456885c650?q=80&w=2067&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?q=80&w=2070&auto=format&fit=crop",
 ];
 
 const getFallbackImage = (id) => {
@@ -50,16 +48,6 @@ const formatPrice = (price, listingType) => {
   }
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
-
 const cityOfficeMap = {
   "New Delhi": 100002,
   Mumbai: 100003,
@@ -69,7 +57,6 @@ const cityOfficeMap = {
 };
 
 export default function MyProperties() {
-  const [activeTab, setActiveTab] = useState("OWNED");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -100,9 +87,6 @@ export default function MyProperties() {
       const listingsData = listingsRes.data.data || [];
       const propertiesData = propertiesRes.data.data || [];
 
-      console.log("Listings Data:", listingsData);
-      console.log("Properties Data:", propertiesData);
-
       setListings(listingsData);
       setOwnedProperties(propertiesData);
     } catch (error) {
@@ -116,6 +100,37 @@ export default function MyProperties() {
   useEffect(() => {
     fetchAllData();
   }, []);
+
+  const getListingStatusForProperty = (propertyId) => {
+    const propertyListings = listings.filter(
+      (l) => l.property.propertyId === propertyId && l.status === "ACTIVE"
+    );
+    
+    const hasRent = propertyListings.some(l => l.listingType === "RENT");
+    const hasSell = propertyListings.some(l => l.listingType === "SELL");
+    
+    if (hasRent && hasSell) return "LISTED_BOTH";
+    if (hasRent) return "LISTED_RENT";
+    if (hasSell) return "LISTED_SELL";
+    return "UNLISTED";
+  };
+
+  const canDeleteProperty = (propertyId) => {
+    const hasAnyListing = listings.some(
+      (l) => l.property.propertyId === propertyId
+    );
+    return !hasAnyListing;
+  };
+
+  const canListForType = (propertyId, listingType) => {
+    const existingListing = listings.find(
+      (l) => 
+        l.property.propertyId === propertyId && 
+        l.listingType === listingType && 
+        l.status === "ACTIVE"
+    );
+    return !existingListing;
+  };
 
   const handleAddProperty = async (e) => {
     e.preventDefault();
@@ -187,6 +202,14 @@ export default function MyProperties() {
   };
 
   const handleDeleteProperty = async (propertyId) => {
+    if (!canDeleteProperty(propertyId)) {
+      showNotification(
+        "Cannot delete property with active or inactive listings!",
+        "error"
+      );
+      return;
+    }
+
     if (!window.confirm("Are you sure you want to delete this property?"))
       return;
 
@@ -208,6 +231,14 @@ export default function MyProperties() {
   const handleListProperty = async (e) => {
     e.preventDefault();
     if (!selectedProperty) return;
+
+    if (!canListForType(selectedProperty.id, listingForm.listingType)) {
+      showNotification(
+        `Property already has an active ${listingForm.listingType} listing!`,
+        "error"
+      );
+      return;
+    }
 
     try {
       const response = await API.post("/api/listings", {
@@ -232,39 +263,24 @@ export default function MyProperties() {
     }
   };
 
-  const getListingForProperty = (propertyId) => {
-    return listings.find((l) => l.property.propertyId === propertyId);
+  const getActiveListingsForProperty = (propertyId) => {
+    return listings.filter(
+      (l) => l.property.propertyId === propertyId && l.status === "ACTIVE"
+    );
   };
 
-  const query = searchQuery.trim().toLowerCase();
-
-  const getFilteredData = () => {
-    if (activeTab === "OWNED") {
-      return ownedProperties;
-    } else if (activeTab === "ACTIVE") {
-      return listings.filter(
-        (l) =>
-          l.status === "ACTIVE" &&
-          (String(l.tokenId).includes(query) ||
-            l.property.houseNo?.toLowerCase().includes(query) ||
-            l.property.locality?.toLowerCase().includes(query) ||
-            l.property.city?.toLowerCase().includes(query) ||
-            `${l.property.BHK} bhk`.includes(query)),
-      );
-    } else {
-      return listings.filter(
-        (l) =>
-          l.status === "INACTIVE" &&
-          (String(l.tokenId).includes(query) ||
-            l.property.houseNo?.toLowerCase().includes(query) ||
-            l.property.locality?.toLowerCase().includes(query) ||
-            l.property.city?.toLowerCase().includes(query) ||
-            `${l.property.BHK} bhk`.includes(query)),
-      );
-    }
-  };
-
-  const filteredData = getFilteredData();
+  const filteredProperties = ownedProperties.filter((property) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    
+    return (
+      property.houseNo?.toLowerCase().includes(query) ||
+      property.locality?.toLowerCase().includes(query) ||
+      property.city?.toLowerCase().includes(query) ||
+      `${property.BHK} bhk`.includes(query) ||
+      property.area?.toLowerCase().includes(query)
+    );
+  });
 
   if (loading) {
     return (
@@ -310,61 +326,45 @@ export default function MyProperties() {
             My Properties
           </h1>
           <p className="text-zinc-400 text-sm font-medium">
-            Manage your real estate portfolio and listings.
+            Manage your property portfolio. {ownedProperties.length} properties owned.
           </p>
         </div>
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 text-xs"
+          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 text-sm"
         >
           <PlusCircle size={16} /> Add Property
         </button>
       </div>
 
-      {/* Tabs & Search */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-        <div className="flex items-center p-1 bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto scrollbar-hide">
-          {["OWNED", "ACTIVE", "SOLD"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
-                activeTab === tab
-                  ? "bg-orange-500 text-white shadow-lg shadow-orange-500/10"
-                  : "text-zinc-500 hover:text-white"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-        <div className="relative flex-1 lg:w-64 group">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors"
-            size={14}
-          />
-          <input
-            type="text"
-            placeholder="Search by house no, locality, city, BHK..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 pl-9 pr-3 text-zinc-200 focus:outline-none focus:border-orange-500/50 transition-all placeholder:text-zinc-600 text-xs font-medium"
-          />
-        </div>
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors"
+          size={16}
+        />
+        <input
+          type="text"
+          placeholder="Search by house no, locality, city, BHK, area..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2.5 pl-9 pr-3 text-zinc-200 focus:outline-none focus:border-orange-500/50 transition-all placeholder:text-zinc-600 text-sm font-medium"
+        />
       </div>
 
       {/* Properties Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredData.map((item) => {
-          const isListing = activeTab !== "OWNED";
-          const property = isListing ? item.property : item;
-          const listing = isListing ? item : getListingForProperty(item.id);
-          const fallbackImage = getFallbackImage(property.id || item.tokenId);
+        {filteredProperties.map((property) => {
+          const listingStatus = getListingStatusForProperty(property.id);
+          const activeListings = getActiveListingsForProperty(property.id);
+          const fallbackImage = getFallbackImage(property.id);
+          const canDelete = canDeleteProperty(property.id);
+          const canEdit = true;
 
           return (
             <motion.div
-              key={isListing ? item.tokenId : property.id}
+              key={property.id}
               layout
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -376,52 +376,84 @@ export default function MyProperties() {
                   alt={property.houseNo}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute top-3 right-3">
-                  {isListing && (
-                    <span
-                      className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg ${
-                        item.status === "ACTIVE"
-                          ? "bg-emerald-500 text-white"
-                          : "bg-zinc-600 text-white"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  )}
-                  {!isListing && listing?.status === "ACTIVE" && (
+                
+                {/* Status Badges */}
+                <div className="absolute top-3 right-3 flex gap-2">
+                  {listingStatus !== "UNLISTED" && (
                     <span className="px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg bg-emerald-500 text-white">
                       LISTED
                     </span>
                   )}
                 </div>
-                {isListing && listing?.listingType && (
-                  <div className="absolute top-3 left-3">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg ${
-                        item.listingType === "RENT"
-                          ? "bg-blue-500 text-white"
-                          : "bg-purple-500 text-white"
-                      }`}
-                    >
-                      {item.listingType}
-                    </span>
+
+                {listingStatus !== "UNLISTED" && (
+                  <div className="absolute top-3 left-3 flex gap-1">
+                    {activeListings.map((listing, idx) => (
+                      <span
+                        key={idx}
+                        className={`px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg ${
+                          listing.listingType === "RENT"
+                            ? "bg-blue-500 text-white"
+                            : "bg-purple-500 text-white"
+                        }`}
+                      >
+                        {listing.listingType}
+                      </span>
+                    ))}
                   </div>
                 )}
+
+                {/* Action Buttons Overlay */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                  {canEdit && (
+                    <button
+                      onClick={() => {
+                        setSelectedProperty(property);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="p-2.5 bg-orange-500 hover:bg-orange-600 rounded-full transition-all transform hover:scale-110"
+                      title="Edit Property"
+                    >
+                      <Edit3 size={18} className="text-white" />
+                    </button>
+                  )}
+                  {(listingStatus === "UNLISTED" || activeListings.length < 2) && (
+                    <button
+                      onClick={() => {
+                        setSelectedProperty(property);
+                        setIsListModalOpen(true);
+                      }}
+                      className="p-2.5 bg-emerald-500 hover:bg-emerald-600 rounded-full transition-all transform hover:scale-110"
+                      title="List Property"
+                    >
+                      <Tag size={18} className="text-white" />
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDeleteProperty(property.id)}
+                      className="p-2.5 bg-red-500 hover:bg-red-600 rounded-full transition-all transform hover:scale-110"
+                      title="Delete Property"
+                    >
+                      <Trash2 size={18} className="text-white" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-start justify-between mb-1 gap-2">
-                  <h3 className="text-sm font-bold text-white truncate flex-1">
+                  <h3 className="text-base font-bold text-white truncate flex-1">
                     {property.houseNo}, {property.locality}
                   </h3>
-                  {isListing && (
+                  {listingStatus !== "UNLISTED" && activeListings[0] && (
                     <p className="text-orange-500 font-bold text-sm whitespace-nowrap">
-                      {formatPrice(item.price, item.listingType)}
+                      {formatPrice(activeListings[0].price, activeListings[0].listingType)}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] mb-3 font-medium">
+                <div className="flex items-center gap-1.5 text-zinc-500 text-xs mb-3 font-medium">
                   <MapPin size={12} />
                   <span className="truncate">
                     {property.area}, {property.city} - {property.pin}
@@ -430,121 +462,72 @@ export default function MyProperties() {
 
                 {/* Property Details */}
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 bg-zinc-800/50 rounded-lg text-zinc-400 text-[9px] font-medium">
-                    {property.BHK} BHK
+                  <span className="px-2 py-1 bg-zinc-800/50 rounded-lg text-zinc-400 text-[10px] font-medium flex items-center gap-1">
+                    <Bed size={10} /> {property.BHK} BHK
                   </span>
-                  <span className="px-2 py-1 bg-zinc-800/50 rounded-lg text-zinc-400 text-[9px] font-medium">
+                  <span className="px-2 py-1 bg-zinc-800/50 rounded-lg text-zinc-400 text-[10px] font-medium">
                     {property.type}
                   </span>
-                  <span className="px-2 py-1 bg-zinc-800/50 rounded-lg text-zinc-400 text-[9px] font-medium">
-                    {property.size} sq.ft
+                  <span className="px-2 py-1 bg-zinc-800/50 rounded-lg text-zinc-400 text-[10px] font-medium flex items-center gap-1">
+                    <Square size={10} /> {property.size} sq.ft
                   </span>
-                  <span className="px-2 py-1 bg-zinc-800/50 rounded-lg text-zinc-400 text-[9px] font-medium">
-                    Built: {property.year_built}
+                  <span className="px-2 py-1 bg-zinc-800/50 rounded-lg text-zinc-400 text-[10px] font-medium flex items-center gap-1">
+                    <Calendar size={10} /> Built: {property.year_built}
                   </span>
                 </div>
 
-                {/* Listing Specific Details */}
-                {isListing && (
-                  <>
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                      <div className="bg-zinc-800/30 p-2 rounded-xl border border-zinc-800/50">
-                        <p className="text-zinc-500 text-[8px] font-bold uppercase tracking-widest mb-0.5">
-                          Token ID
-                        </p>
-                        <p className="text-white font-bold text-xs">
-                          #{item.tokenId}
-                        </p>
-                      </div>
-                      <div className="bg-zinc-800/30 p-2 rounded-xl border border-zinc-800/50">
-                        <p className="text-zinc-500 text-[8px] font-bold uppercase tracking-widest mb-0.5">
-                          Listed On
-                        </p>
-                        <p className="text-white font-bold text-xs">
-                          {formatDate(item.listingDate)}
-                        </p>
-                      </div>
-                    </div>
+                {/* Additional Info */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="bg-zinc-800/30 p-2 rounded-xl border border-zinc-800/50">
+                    <p className="text-zinc-500 text-[8px] font-bold uppercase tracking-widest mb-0.5">
+                      Property ID
+                    </p>
+                    <p className="text-white font-bold text-xs">
+                      #{property.id}
+                    </p>
+                  </div>
+                  <div className="bg-zinc-800/30 p-2 rounded-xl border border-zinc-800/50">
+                    <p className="text-zinc-500 text-[8px] font-bold uppercase tracking-widest mb-0.5">
+                      Office
+                    </p>
+                    <p className="text-white font-bold text-xs">
+                      {property.office?.officeName || "N/A"}
+                    </p>
+                  </div>
+                </div>
 
-                    {/* Agent Info */}
-                    <div className="mb-3 p-2 bg-zinc-800/30 rounded-xl border border-zinc-800/50">
-                      <p className="text-zinc-500 text-[8px] font-bold uppercase tracking-widest mb-1.5">
-                        Assigned Agent
-                      </p>
-                      {item.agent ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold">
-                            {item.agent.name?.substring(0, 2).toUpperCase()}
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-white font-bold text-xs">
-                              {item.agent.name}
-                            </p>
-                            <div className="flex items-center gap-1">
-                              <Star
-                                size={10}
-                                className="text-orange-500 fill-orange-500"
-                              />
-                              <span className="text-orange-500 text-[9px] font-bold">
-                                {item.agent.userRating || "N/A"}
-                              </span>
-                            </div>
-                          </div>
-                          <Phone size={12} className="text-zinc-500" />
+                {/* Active Listings Info */}
+                {listingStatus !== "UNLISTED" && activeListings.length > 0 && (
+                  <div className="mb-3 p-2 bg-zinc-800/30 rounded-xl border border-zinc-800/50">
+                    <p className="text-zinc-500 text-[8px] font-bold uppercase tracking-widest mb-1.5">
+                      Active Listings
+                    </p>
+                    <div className="space-y-1">
+                      {activeListings.map((listing, idx) => (
+                        <div key={idx} className="flex justify-between items-center text-xs">
+                          <span className="text-zinc-400">{listing.listingType}:</span>
+                          <span className="text-white font-bold">
+                            {formatPrice(listing.price, listing.listingType)}
+                          </span>
+                          <span className="text-zinc-500 text-[9px]">
+                            Token #{listing.tokenId}
+                          </span>
                         </div>
-                      ) : (
-                        <p className="text-zinc-500 text-xs">
-                          No agent assigned yet
-                        </p>
-                      )}
+                      ))}
                     </div>
-                  </>
+                  </div>
                 )}
-
-                {/* Action Buttons */}
-                <div className="mt-auto space-y-2">
-                  {!isListing && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setSelectedProperty(property);
-                          setIsEditModalOpen(true);
-                        }}
-                        className="w-full py-2 bg-zinc-800 hover:bg-orange-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-xs group/btn"
-                      >
-                        <Edit3 size={12} /> Edit Property
-                      </button>
-                      {!listing && (
-                        <button
-                          onClick={() => {
-                            setSelectedProperty(property);
-                            setIsListModalOpen(true);
-                          }}
-                          className="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
-                        >
-                          <Tag size={12} /> List Property
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDeleteProperty(property.id)}
-                        className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
-                      >
-                        <Trash2 size={12} /> Delete Property
-                      </button>
-                    </>
-                  )}
-                </div>
               </div>
             </motion.div>
           );
         })}
       </div>
 
-      {filteredData.length === 0 && (
+      {filteredProperties.length === 0 && (
         <div className="text-center py-12 bg-zinc-900/30 rounded-[1.5rem] border border-dashed border-zinc-800">
           <Building2 className="mx-auto text-zinc-800 mb-2" size={32} />
           <p className="text-zinc-500 font-medium text-sm">
-            No properties found in {activeTab.toLowerCase()} section.
+            No properties found. Click "Add Property" to get started.
           </p>
         </div>
       )}
@@ -826,6 +809,14 @@ export default function MyProperties() {
                   />
                 </div>
               </div>
+              <div className="bg-zinc-800/30 p-3 rounded-xl">
+                <p className="text-zinc-500 text-[9px] font-medium">
+                  Note: City and Office cannot be changed
+                </p>
+                <p className="text-white text-xs font-medium mt-1">
+                  City: {selectedProperty.city}
+                </p>
+              </div>
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
@@ -965,385 +956,3 @@ const Modal = ({ onClose, title, children }) => (
     </motion.div>
   </div>
 );
-
-=====================================================
-GET: /api/listings/me/listings
-This returns the all the listings done by the user, they status can be ACTIVE/INACTIVE and list_type can be SELL/RENT
-Response:
-{
-  "data": [
-    {
-      "tokenId": 10000281,
-      "listingDate": "2026-04-22",
-      "listingType": "SELL",
-      "price": 50.0,
-      "description": "gjhgjhj",
-      "status": "ACTIVE",
-      "property": {
-        "propertyId": 50000001,
-        "houseNo": "C-36",
-        "description": "Premium 6 BHK APARTMENT in Laxmi Ganj, Guwahati. Built in 2025 with 2495 sq ft area.",
-        "locality": "Fancy Bazaar",
-        "area": "Laxmi Ganj",
-        "city": "Guwahati",
-        "pin": 781001,
-        "size": 2495.0,
-        "type": "APARTMENT",
-        "BHK": 6
-      },
-      "agent": null,
-      "owner": {
-        "name": "Sanjay Vyas",
-        "phone": "7046406050",
-        "profileUrl": "https://randomuser.me/api/portraits/men/37.jpg"
-      }
-    },
-    {
-      "tokenId": 10000187,
-      "listingDate": "2022-06-28",
-      "listingType": "SELL",
-      "price": 3.896E7,
-      "description": "Luxury villa for sale",
-      "status": "ACTIVE",
-      "property": {
-        "propertyId": 50000110,
-        "houseNo": "H-554",
-        "description": "Premium 2 BHK FLAT in Lashkar, Gwalior. Built in 2014 with 1062 sq ft area.",
-        "locality": "Pinto Park",
-        "area": "Lashkar",
-        "city": "Gwalior",
-        "pin": 474001,
-        "size": 1062.0,
-        "type": "FLAT",
-        "BHK": 2
-      },
-      "agent": {
-        "agentId": 10000061,
-        "name": "Manish Shah",
-        "phone": "9411174682",
-        "profileUrl": "https://randomuser.me/api/portraits/men/39.jpg",
-        "userRating": "0.8",
-        "commissionRate": 2.549999952316284
-      },
-      "owner": {
-        "name": "Sanjay Vyas",
-        "phone": "7046406050",
-        "profileUrl": "https://randomuser.me/api/portraits/men/37.jpg"
-      }
-    },
-    {
-      "tokenId": 10000259,
-      "listingDate": "2023-02-28",
-      "listingType": "RENT",
-      "price": 30000.0,
-      "description": "Cozy apartment for rent",
-      "status": "ACTIVE",
-      "property": {
-        "propertyId": 50000110,
-        "houseNo": "H-554",
-        "description": "Premium 2 BHK FLAT in Lashkar, Gwalior. Built in 2014 with 1062 sq ft area.",
-        "locality": "Pinto Park",
-        "area": "Lashkar",
-        "city": "Gwalior",
-        "pin": 474001,
-        "size": 1062.0,
-        "type": "FLAT",
-        "BHK": 2
-      },
-      "agent": {
-        "agentId": 10000136,
-        "name": "Kavita Chauhan",
-        "phone": "8148419635",
-        "profileUrl": "https://randomuser.me/api/portraits/women/9.jpg",
-        "userRating": "2.1",
-        "commissionRate": 4.460000038146973
-      },
-      "owner": {
-        "name": "Sanjay Vyas",
-        "phone": "7046406050",
-        "profileUrl": "https://randomuser.me/api/portraits/men/37.jpg"
-      }
-    },
-    {
-      "tokenId": 10000282,
-      "listingDate": "2026-04-22",
-      "listingType": "SELL",
-      "price": 500000.0,
-      "description": "sdafas",
-      "status": "ACTIVE",
-      "property": {
-        "propertyId": 50000163,
-        "houseNo": "I-344",
-        "description": "Premium 3 BHK APARTMENT in Dwarka, New Delhi. Built in 2022 with 2239 sq ft area.",
-        "locality": "Hauz Khas",
-        "area": "Dwarka",
-        "city": "New Delhi",
-        "pin": 110001,
-        "size": 2239.0,
-        "type": "APARTMENT",
-        "BHK": 3
-      },
-      "agent": null,
-      "owner": {
-        "name": "Sanjay Vyas",
-        "phone": "7046406050",
-        "profileUrl": "https://randomuser.me/api/portraits/men/37.jpg"
-      }
-    }
-  ],
-  "error": null,
-  "timestamp": null
-}
-
-========================================================
-GET: /api/properties/me/properties
-This returns the properties details owned by the user, whether they are  listed or unlisted.
-Response: 
-{
-  "data": [
-    {
-      "id": 50000001,
-      "type": "APARTMENT",
-      "houseNo": "C-36",
-      "locality": "Fancy Bazaar",
-      "BHK": 6,
-      "size": 2495.0,
-      "city": "Guwahati",
-      "area": "Laxmi Ganj",
-      "year_built": 2025,
-      "pin": 781001,
-      "propertyType": null,
-      "owner": {
-        "name": "Sanjay Vyas",
-        "phone": "7046406050",
-        "profileUrl": "https://randomuser.me/api/portraits/men/37.jpg"
-      },
-      "office": {
-        "officeName": "Mumbai Office",
-        "officeContact": "8856457895",
-        "OfficeLocation": "Mumbai"
-      },
-      "images": []
-    },
-    {
-      "id": 50000110,
-      "type": "FLAT",
-      "houseNo": "H-554",
-      "locality": "Pinto Park",
-      "BHK": 2,
-      "size": 1062.0,
-      "city": "Gwalior",
-      "area": "Lashkar",
-      "year_built": 2014,
-      "pin": 474001,
-      "propertyType": null,
-      "owner": {
-        "name": "Sanjay Vyas",
-        "phone": "7046406050",
-        "profileUrl": "https://randomuser.me/api/portraits/men/37.jpg"
-      },
-      "office": {
-        "officeName": "Mumbai Office",
-        "officeContact": "8856457895",
-        "OfficeLocation": "Mumbai"
-      },
-      "images": []
-    },
-    {
-      "id": 50000135,
-      "type": "APARTMENT",
-      "houseNo": "G-879",
-      "locality": "Karol Bagh",
-      "BHK": 1,
-      "size": 2661.0,
-      "city": "New Delhi",
-      "area": "Dwarka",
-      "year_built": 2018,
-      "pin": 110001,
-      "propertyType": null,
-      "owner": {
-        "name": "Sanjay Vyas",
-        "phone": "7046406050",
-        "profileUrl": "https://randomuser.me/api/portraits/men/37.jpg"
-      },
-      "office": {
-        "officeName": "Delhi Office",
-        "officeContact": "8822635623",
-        "OfficeLocation": "New Delhi"
-      },
-      "images": []
-    },
-    {
-      "id": 50000163,
-      "type": "APARTMENT",
-      "houseNo": "I-344",
-      "locality": "Hauz Khas",
-      "BHK": 3,
-      "size": 2239.0,
-      "city": "New Delhi",
-      "area": "Dwarka",
-      "year_built": 2022,
-      "pin": 110001,
-      "propertyType": null,
-      "owner": {
-        "name": "Sanjay Vyas",
-        "phone": "7046406050",
-        "profileUrl": "https://randomuser.me/api/portraits/men/37.jpg"
-      },
-      "office": {
-        "officeName": "Gwalior",
-        "officeContact": "7985468952",
-        "OfficeLocation": "Gwalior"
-      },
-      "images": []
-    }
-  ],
-  "error": null,
-  "timestamp": null
-}
-
-=======================================================
-To add new property POST: /api/properties 
-requested body:
-PropertyRequestDTO {
-    private Property_type type;   FLAT/APARTMENT
-    private String desctiption;  user input
-    private String houseNo;  
-    private String locality;  user input
-    private int BHK;  [1 - 10]
-    private float size;  in sq ft
-    private String city;  {New Delhi, Mumbai, Lucknow, Gwalior, Guwahati}
-    private String area;  user input
-    private int year_built;  userinput must be valid year
-    private int pin; 6 digit pin
-    private Long officeId;  do not ask from user
-}
-// Choose from valid cities 
-{
-New Delhi:  100002
-Mumbai:  100003
-Lucknow: 100004
-Gwalior: 100005
-Guwahati: 100006
-}
-
-=======================================================
-To edit Property PUT: /api/properties/{propertyId}
-Body requested: 
-PropertyRequestDTO {
-    private Property_type type;
-    private String desctiption;
-    private String houseNo;
-    private String locality;
-    private int BHK;
-    private float size;
-    private String city;
-    private String area;
-    private int year_built;
-    private int pin;
-    private Long officeId;  // not allowed to change
-}
-
-========================================================
-To delete the property DELETE: /api/properties/{propertyId}
-
-========================================================
-To list the property POST: /api/listings
-body requested:
-public class ListingTokenRequestDTO {
-    private Long propertyId;
-    private Listing_type listingType;
-    private float price;
-    private String description;
-}
-
-========================================================
-To edit listing PUT: /api/listings/{listingId}
-body requested:
-public class ListingTokenRequestDTO {
-    private Long propertyId;
-    private Listing_type listingType;
-    private float price;
-    private String description;
-}
-
-========================================================
-To unlist the listing DELETE: /api/listings/{listingId}
-
-
-This is the old my property page, I want to devide it in to different pages, one is MyProperties which contains all the owned properties(Listed or unlisted) by the user, he can also add new properties, edit and delete them here, and other page is myListings which contains the listing details with a toggle of active and sold.
-
-Instructions for myProperties page:-
-Any owned property can have 4 states - UNLISTED, Listed for RENT, Listed for SELL, Listed for both REND and SELL.
-At most the user can have two ACTIVE listing for one property, one for RENT and one for SELL, Only for ACTIVE listings.
-1. Call both the API tp get the owned properties details and listing details.
-2. For each owned property, user should be allowed to do these operations
-  a. Edit the property details: Only allow to edit the Property_type, description, houseNo, locality, BHK, size, area, year_built, pin.
-dont allow, to change the officeID, city, keep it same.
-  b. Delete the property: Cross check each property with the api listing properties, if it is present in any kind of listings then dont allow to delete the property. 
-  c. List the property: Check for only active listings, if already active for Rent, disallow to list for rent again, if already active for sell, disallow to list for sell again.
-3. User can also Add new properties, and also Edit and delete them, deletion not allowed after listing, as it will violate the foreign key constraint.
-Call the appropriate API for each operation. modify the ui based on the requirement.
-Try to show most of the data from the API.
-
-
-Instructions for myListings page:-
-1. call the api : /api/listings/me/listings to get listing data.
-2. Devide them into Active/Inactive
-3. Active properties go to Active tab, while inactive listing go to Sold tab
-4. Operations that user can perform:
-  a. for sold(Inactive) properties, do not allow any thing
-  b. For Active properties, user can do the following operations
-    i. Unlist the property: Call the api to unlist the property, once unlisted, it can be relisted.
-    ii. Edit the listing details: Only allow to edit the price, description, propertyId, listingType.
-
-Do not add the owner details to any card, on any page.
-Cards on two pages can differ, as they contain different details.
-Add the details into the card, modify card if required.
-Note the active listed properties are are also Owned property, so they should be included along with the unlisted properties in the OWNED section.
-
-
-Delete only the valid properties on mylisting page.
-Valid for Deletion -
-properties which are neither in active nor in inactive listings of any kind.
-
-show the response status after operations, make the buttons fully functional
-
-modify the add property form panel if needed, also make user to able to edit the valid properties, only those which are in active list or unlisted.
-
-fix the ui, there are three buttons in the owned card, it is not looking good, instead you can have a pencil icon, and a delete icon over the image, which are visible on hovering, also add some other details, given in api like the TokenID, propertyID, etc
-
-
-
-
-
-
-
-      {/* Search & Stats */}
-      <div className="flex flex-col lg:flex-row gap-4 justify-between">
-        <div className="relative group flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors" size={14} />
-          <input
-            type="text"
-            placeholder="Search by house no, locality, city, BHK, property ID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2.5 pl-9 pr-3 text-zinc-200 focus:outline-none focus:border-orange-500/50 transition-all placeholder:text-zinc-600 text-sm"
-          />
-        </div>
-        
-        <div className="flex gap-3">
-          <div className="px-4 py-2 bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 rounded-xl">
-            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Total Owned</p>
-            <p className="text-xl font-bold text-white">{ownedProperties.length}</p>
-          </div>
-          <div className="px-4 py-2 bg-gradient-to-br from-emerald-900/20 to-emerald-900/10 border border-emerald-500/20 rounded-xl">
-            <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Listed</p>
-            <p className="text-xl font-bold text-emerald-400">{ownedProperties.filter((p) => getActiveListings(p.id).length > 0).length}</p>
-          </div>
-          <div className="px-4 py-2 bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 rounded-xl">
-            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Unlisted</p>
-            <p className="text-xl font-bold text-white">{ownedProperties.filter((p) => getActiveListings(p.id).length === 0).length}</p>
-          </div>
-        </div>
-      </div>

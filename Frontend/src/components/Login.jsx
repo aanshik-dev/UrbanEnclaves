@@ -33,7 +33,8 @@ const Login = () => {
     } else if (role === "AGENT") {
       setEmail("kiran.saxena@example.com");
     } else {
-      setEmail("aditya.sharma@example.com");
+      // setEmail("aditya.sharma@example.com");
+      setEmail("sanjay.vyas@example.com");
     }
   }, [role]);
 
