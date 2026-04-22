@@ -5,7 +5,7 @@ import { useState } from "react";
 const team = [
   {
     name: "Ansik Singh Tomar",
-    role: "Lead Frontend Developer",
+    role: "Frontend Developer",
     id: "2401037",
     image: "AT",
     imageUrl: null,
@@ -19,7 +19,7 @@ const team = [
   },
   {
     name: "Anuved Pratap Singh",
-    role: "Lead Backend Developer and Database Architect",
+    role: "Backend Developer",
     id: "2401041",
     image: "AS",
     imageUrl: null,
@@ -33,7 +33,7 @@ const team = [
   },
   {
     name: "Anmol Kumar",
-    role: "Lead Backend Developer & System Designer",
+    role: "Backend Developer",
     id: "2401032",
     image: "AK",
     imageUrl: null,
